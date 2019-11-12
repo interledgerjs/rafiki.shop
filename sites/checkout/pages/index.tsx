@@ -1,13 +1,18 @@
 import React, { useState, useMemo, MouseEvent } from 'react'
 import axios from 'axios'
 import { NextPage } from "next"
+import nanoid from 'nanoid'
+import { Base64 } from 'js-base64'
 
 const toVisibileValue = (amount: number) => {
   return (amount / 100).toFixed(2)
 }
 
+type Props = {
+  id: string
+}
 
-const Page: NextPage = () => {
+const Page: NextPage<Props> = ({ id }) => {
   const OAUTH_CLIENT_ID = process.env.OAUTH_CLIENT_ID
   const OAUTH_CALLBACK_URL = process.env.OAUTH_CALLBACK_URL
 
@@ -45,16 +50,23 @@ const Page: NextPage = () => {
       console.log('Creating mandate at: ', response.payment_mandates_endpoint)
       debugger
       // create mandate
-      const {data} = await axios.post(response.payment_mandates_endpoint, {
+      const { data } = await axios.post(response.payment_mandates_endpoint, {
         asset: {code: 'USD', scale: 2},
         amount: total.toString(),
         scope: paymentPointer,
-        description: "ILP Eats Order"
+        description: `ILP Eats Order ${id}`
       })
+
       const mandateId = data.id
 
+      const state = Base64.encode(JSON.stringify({
+        mandate: data,
+        amount: total.toString(),
+        orderId: id
+      }), true)
+
       // request authorization for mandate
-      const authQuery = `?client_id=${OAUTH_CLIENT_ID}&response_type=code&scope=openid%20mandates.${mandateId}&state=abcdefghj&redirect_uri=${OAUTH_CALLBACK_URL}`
+      const authQuery = `?client_id=${OAUTH_CLIENT_ID}&response_type=code&scope=openid%20mandates.${mandateId}&state=${state}&redirect_uri=${OAUTH_CALLBACK_URL}`
       console.log('Mandate created. ', data)
       console.log('Redirecting to authorization endpoint to make an authorization request of:', authQuery.substring(1))
       debugger
@@ -181,7 +193,10 @@ const Page: NextPage = () => {
 }
 
 Page.getInitialProps = async ({req}) => {
-  return {}
+  const id = nanoid()
+  return {
+    id
+  }
 }
 
 export default Page

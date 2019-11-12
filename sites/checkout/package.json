@@ -8,12 +8,18 @@
     "start": "next start"
   },
   "dependencies": {
+    "got": "^9.6.0",
+    "ilp-protocol-stream": "^2.2.0",
+    "js-base64": "^2.5.1",
     "nanoid": "^2.1.6",
     "next": "9.1.2",
+    "openid-client": "^3.8.2",
     "react": "16.11.0",
-    "react-dom": "16.11.0"
+    "react-dom": "16.11.0",
+    "react-spinners": "^0.6.1"
   },
   "devDependencies": {
+    "@types/got": "^9.6.9",
     "@types/node": "^12.12.6",
     "@types/react": "^16.9.11",
     "@zeit/next-css": "^1.0.1",
