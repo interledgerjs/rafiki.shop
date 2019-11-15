@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react'
-import Layout from '../src/Layout'
+import React, { useState, useEffect} from 'react'
 import axios from 'axios'
 import { NextPage } from "next"
 import { Base64 } from 'js-base64'
@@ -54,18 +53,18 @@ const PaymentMethodCard: React.FC<{ hide: boolean, setPaymentPointer: React.Disp
 
 	return (
 		<div>
-			<div className="text-2xl text-grey-800 my-4">
+			<div className="text-2xl text-gray-700 my-4">
 				Payment method
       </div>
 			<div className="mt-4">
 				<div className="rounded-lg shadow-md bg-white flex flex-col mx-auto" style={{ width: '20rem', height: '12rem' }}>
 					<div className="flex-1 flex justify-end">
-						<div className="mt-2 mr-4 text-grey-800">
+						<div className="mt-2 mr-4 text-gray-700">
 							ILP Payment Details
             </div>
 					</div>
 					<div className="flex-1 flex flex-col">
-						<input className="mx-4 shadow appearance-none border rounded py-2 px-3 text-grey-800 leading-tight focus:outline-none focus:shadow-outline" id="payment-pointer" type="text" placeholder="$example.com/alice" value={paymentPointer} onChange={event => setPaymentPointer(event.currentTarget.value)} />
+						<input className="mx-4 shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="payment-pointer" type="text" placeholder="$example.com/alice" value={paymentPointer} onChange={event => setPaymentPointer(event.currentTarget.value)} />
 						{
 							paymentPointerError !== '' ?
 								<div className="mt-2 text-center text-xs text-red-600">
@@ -239,22 +238,21 @@ const Page: NextPage<Props> = ({ id }) => {
 	}
 
 	return (
-		<Layout title="Subscribe">
 			<div className="max-w-xl h-full flex flex-col mx-auto mt-8">
-				<div className="mx-auto w-2/3">
-					<div className="text-4xl">
+				<div className="mx-auto">
+					<div className="max-w-5xl mx-auto mt-8 text-4xl text-gray-800">
 						Start watching on ILPFlix Now!
           </div>
 					<div className="w-full mt-8">
-						<div className="text-2xl text-grey-800 my-4">
+						<div className="text-2xl text-gray-700 my-4">
 							Select a plan
             </div>
 						<div className="flex flex-col">
 							{
 								plans.map((plan, index) => {
 									return (
-										<div key={index} onClick={(event) => setSelectedPlanIndex(index)} className={"bg-white shadow-md h-24 rounded-lg flex px-4 py-4 mb-6 cursor-pointer border-2 hover:border-teal " + (selectedPlanIndex === index ? "border-teal" : "")}>
-											<div className="w-24 my-auto text-grey-900 font-bold">
+										<div key={index} onClick={(event) => setSelectedPlanIndex(index)} className={"bg-white shadow-md h-24 rounded-lg flex px-4 py-4 mb-6 cursor-pointer border-2 hover:border-teal-500 " + (selectedPlanIndex === index ? "border-teal-500" : "")}>
+											<div className="w-24 my-auto text-gray-900 font-bold">
 												{plan.name}
 											</div>
 											<div className="flex-1 my-auto font-light">
@@ -273,14 +271,13 @@ const Page: NextPage<Props> = ({ id }) => {
 						<PaymentMethodCard paymentPointer={paymentPointer} setPaymentPointer={setPaymentPointer} hide={hasPaymentRequest} paymentPointerError={paymentPointerError} />
 						<div className="flex justify-center mx-auto max-w-xs mt-8">
 							<button
-								className="text-lg w-full font-semibold rounded-lg px-4 py-1 leading-normal bg-white border border-teal text-teal hover:bg-teal hover:text-white" onClick={subscribe}>
+								className="text-lg w-full font-semibold rounded-lg px-4 py-1 leading-normal bg-white border border-teal-500 text-teal-500 hover:bg-teal-500 hover:text-white" onClick={subscribe}>
 								{isSubmitting ? '...' : 'Subscribe'}
 							</button>
 						</div>
 					</div>
 				</div>
 			</div>
-		</Layout>
 	)
 }
 
