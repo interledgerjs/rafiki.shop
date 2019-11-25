@@ -1,4 +1,4 @@
-import React, { useState, useEffect} from 'react'
+import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import { NextPage } from "next"
 import { Base64 } from 'js-base64'
@@ -8,17 +8,20 @@ const plans = [
 	{
 		name: 'Basic',
 		description: "Watch on 1 screen at a time in Standard Definition",
-		price: 899
+		// price: 899
+		price: 299
 	},
 	{
 		name: 'Standard',
 		description: "Watch on 2 screens at a time. HD available.",
-		price: 1299
+		// price: 1299
+		price: 399
 	},
 	{
 		name: 'Premium',
 		description: "Watch on 4 screens at a time. HD and Ultra HD available.",
-		price: 1599
+		// price: 1599
+		price: 499
 	}
 ]
 
@@ -146,7 +149,7 @@ const Page: NextPage<Props> = ({ id }) => {
 					},
 					amount: selectedPlan.price.toString(),
 					description: `ILPFlix ${selectedPlan.name} plan.`,
-					interval: 'P0Y1M0DT0H0M0S',
+					interval: 'P0Y0M0DT0H0M60S',
 					expiry: yearInFuture
 				},
 				merchantInfo: {
@@ -204,7 +207,7 @@ const Page: NextPage<Props> = ({ id }) => {
 
 				console.log('Server meta data received from payment pointer: ', serverMetaData)
 				console.log('Creating mandate at: ', serverMetaData.payment_mandates_endpoint)
-				debugger
+
 
 				const selectedPlan = plans[selectedPlanIndex]
 				const yearInFuture = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).getTime()
@@ -212,7 +215,7 @@ const Page: NextPage<Props> = ({ id }) => {
 				const { data } = await axios.post(serverMetaData.payment_mandates_endpoint, {
 					asset: { code: 'USD', scale: 2 },
 					amount: selectedPlan.price.toString(),
-					interval: 'P0Y1M0DT0H0M0S',
+					interval: 'P0Y0M0DT0H0M60S',
 					scope: paymentPointer,
 					expiry: yearInFuture,
 					description: `ILPFlix ${selectedPlan.name} plan.`
@@ -229,7 +232,7 @@ const Page: NextPage<Props> = ({ id }) => {
 				const authQuery = `?client_id=${OAUTH_CLIENT_ID}&response_type=code&scope=openid%20offline%20mandates.${mandateId}&state=${state}&redirect_uri=${OAUTH_CALLBACK_URL}`
 				console.log('Mandate created. ', data)
 				console.log('Redirecting to authorization endpoint to make an authorization request of:', authQuery.substring(1))
-				debugger
+
 				window.location.href = serverMetaData.authorization_endpoint + authQuery
 			} catch (error) {
 				console.error('error', error)
@@ -238,46 +241,46 @@ const Page: NextPage<Props> = ({ id }) => {
 	}
 
 	return (
-			<div className="max-w-xl h-full flex flex-col mx-auto mt-8">
-				<div className="mx-auto">
-					<div className="max-w-5xl mx-auto mt-8 text-4xl text-gray-800">
-						Start watching on ILPFlix Now!
+		<div className="max-w-xl h-full flex flex-col mx-auto mt-8">
+			<div className="mx-auto">
+				<div className="max-w-5xl mx-auto mt-8 text-4xl text-gray-800">
+					Start watching on ILPFlix Now!
           </div>
-					<div className="w-full mt-8">
-						<div className="text-2xl text-gray-700 my-4">
-							Select a plan
+				<div className="w-full mt-8">
+					<div className="text-2xl text-gray-700 my-4">
+						Select a plan
             </div>
-						<div className="flex flex-col">
-							{
-								plans.map((plan, index) => {
-									return (
-										<div key={index} onClick={(event) => setSelectedPlanIndex(index)} className={"bg-white shadow-md h-24 rounded-lg flex px-4 py-4 mb-6 cursor-pointer border-2 hover:border-teal-500 " + (selectedPlanIndex === index ? "border-teal-500" : "")}>
-											<div className="w-24 my-auto text-gray-900 font-bold">
-												{plan.name}
-											</div>
-											<div className="flex-1 my-auto font-light">
-												{plan.description}
-											</div>
-											<div className="w-32 flex mx-auto my-auto text-lg">
-												${(plan.price / 100).toFixed(2)}/month
-                      </div>
+					<div className="flex flex-col">
+						{
+							plans.map((plan, index) => {
+								return (
+									<div key={index} onClick={(event) => setSelectedPlanIndex(index)} className={"bg-white shadow-md h-24 rounded-lg flex px-4 py-4 mb-6 cursor-pointer border-2 hover:border-teal-500 " + (selectedPlanIndex === index ? "border-teal-500" : "")}>
+										<div className="w-24 my-auto text-gray-900 font-bold">
+											{plan.name}
 										</div>
-									)
-								})
-							}
-						</div>
+										<div className="flex-1 my-auto font-light">
+											{plan.description}
+										</div>
+										<div className="w-32 flex mx-auto my-auto text-lg">
+											${(plan.price / 100).toFixed(2)}/month
+                      </div>
+									</div>
+								)
+							})
+						}
 					</div>
-					<div className="">
-						<PaymentMethodCard paymentPointer={paymentPointer} setPaymentPointer={setPaymentPointer} hide={hasPaymentRequest} paymentPointerError={paymentPointerError} />
-						<div className="flex justify-center mx-auto max-w-xs mt-8">
-							<button
-								className="text-lg w-full font-semibold rounded-lg px-4 py-1 leading-normal bg-white border border-teal-500 text-teal-500 hover:bg-teal-500 hover:text-white" onClick={subscribe}>
-								{isSubmitting ? '...' : 'Subscribe'}
-							</button>
-						</div>
+				</div>
+				<div className="">
+					<PaymentMethodCard paymentPointer={paymentPointer} setPaymentPointer={setPaymentPointer} hide={hasPaymentRequest} paymentPointerError={paymentPointerError} />
+					<div className="flex justify-center mx-auto max-w-xs mt-8">
+						<button
+							className="text-lg w-full font-semibold rounded-lg px-4 py-1 leading-normal bg-white border border-teal-500 text-teal-500 hover:bg-teal-500 hover:text-white" onClick={subscribe}>
+							{isSubmitting ? '...' : 'Subscribe'}
+						</button>
 					</div>
 				</div>
 			</div>
+		</div>
 	)
 }
 
