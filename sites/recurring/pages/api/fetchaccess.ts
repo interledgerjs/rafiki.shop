@@ -1,8 +1,11 @@
 import { NextApiRequest, NextApiResponse } from "next"
+import getConfig from 'next/config'
 const { Issuer } = require("openid-client")
 
-const OAUTH_CLIENT_ID = "rafiki.shop"
-const OAUTH_CALLBACK_URL = process.env.OAUTH_CALLBACK_URL
+const { publicRuntimeConfig } = getConfig()
+
+const OAUTH_CLIENT_ID = publicRuntimeConfig.OAUTH_CLIENT_ID
+const OAUTH_CALLBACK_URL = publicRuntimeConfig.OAUTH_CALLBACK_URL
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   const { body } = req

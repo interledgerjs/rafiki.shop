@@ -3,24 +3,24 @@ import axios from 'axios'
 import { NextPage } from "next"
 import { Base64 } from 'js-base64'
 import nanoid from 'nanoid'
+import getConfig from 'next/config'
+
+const { publicRuntimeConfig } = getConfig()
 
 const plans = [
 	{
 		name: 'Basic',
 		description: "Watch on 1 screen at a time in Standard Definition",
-		// price: 899
 		price: 299
 	},
 	{
 		name: 'Standard',
 		description: "Watch on 2 screens at a time. HD available.",
-		// price: 1299
 		price: 399
 	},
 	{
 		name: 'Premium',
 		description: "Watch on 4 screens at a time. HD and Ultra HD available.",
-		// price: 1599
 		price: 499
 	}
 ]
@@ -94,8 +94,8 @@ type Props = {
 
 const Page: NextPage<Props> = ({ id }) => {
 
-	const OAUTH_CLIENT_ID = process.env.OAUTH_CLIENT_ID
-	const OAUTH_CALLBACK_URL = process.env.OAUTH_CALLBACK_URL
+	const OAUTH_CLIENT_ID = publicRuntimeConfig.OAUTH_CLIENT_ID
+	const OAUTH_CALLBACK_URL = publicRuntimeConfig.OAUTH_CALLBACK_URL
 
 	const [paymentPointer, setPaymentPointer] = useState('')
 	const [selectedPlanIndex, setSelectedPlanIndex] = useState<number>(0)
