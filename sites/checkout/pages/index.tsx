@@ -3,6 +3,9 @@ import axios from 'axios'
 import { NextPage } from "next"
 import nanoid from 'nanoid'
 import { Base64 } from 'js-base64'
+import getConfig from 'next/config'
+
+const { publicRuntimeConfig } = getConfig()
 
 const toVisibileValue = (amount: number) => {
   return (amount / 100).toFixed(2)
@@ -13,8 +16,8 @@ type Props = {
 }
 
 const Page: NextPage<Props> = ({ id }) => {
-  const OAUTH_CLIENT_ID = process.env.OAUTH_CLIENT_ID
-  const OAUTH_CALLBACK_URL = process.env.OAUTH_CALLBACK_URL
+  const OAUTH_CLIENT_ID = publicRuntimeConfig.OAUTH_CLIENT_ID
+  const OAUTH_CALLBACK_URL = publicRuntimeConfig.OAUTH_CALLBACK_URL
 
   const [totalBurgers, setTotalBurgers] = useState(1)
   const [totalFries, setTotalFries] = useState(1)
