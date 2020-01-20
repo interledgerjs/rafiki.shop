@@ -99,34 +99,34 @@ const Page: NextPage<Props> = ({ id }) => {
 
 	const [paymentPointer, setPaymentPointer] = useState('')
 	const [selectedPlanIndex, setSelectedPlanIndex] = useState<number>(0)
-	const [hasPaymentRequest, setHasPaymentRequest] = useState(true)
+	const [hasPaymentRequest, setHasPaymentRequest] = useState(false)
 	const [paymentPointerError, setPaymentPointerError] = useState('')
 	const [isSubmitting, setIsSubmitting] = useState(false)
 
-	useEffect(() => {
-		const check = async () => {
-			if ('PaymentRequest' in window) {
-				const dummydetails = {
-					total: {
-						label: "Total",
-						amount: {
-							currency: "USD",
-							value: "0.00",
-						},
-					},
-				};
-
-				const supportsInterledgerPayment = await new PaymentRequest(
-					[{ supportedMethods: "interledger" }],
-					dummydetails
-				).canMakePayment();
-				setHasPaymentRequest(supportsInterledgerPayment)
-			} else {
-				setHasPaymentRequest(false)
-			}
-		}
-		check()
-	}, [])
+	// useEffect(() => {
+	// 	const check = async () => {
+	// 		if ('PaymentRequest' in window) {
+	// 			const dummydetails = {
+	// 				total: {
+	// 					label: "Total",
+	// 					amount: {
+	// 						currency: "USD",
+	// 						value: "0.00",
+	// 					},
+	// 				},
+	// 			};
+	//
+	// 			const supportsInterledgerPayment = await new PaymentRequest(
+	// 				[{ supportedMethods: "interledger" }],
+	// 				dummydetails
+	// 			).canMakePayment();
+	// 			setHasPaymentRequest(supportsInterledgerPayment)
+	// 		} else {
+	// 			setHasPaymentRequest(false)
+	// 		}
+	// 	}
+	// 	check()
+	// }, [])
 
 	function subscribe() {
 		if (hasPaymentRequest) {
