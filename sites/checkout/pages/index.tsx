@@ -1,5 +1,6 @@
 import React, { useState, useMemo, MouseEvent } from 'react'
 import axios from 'axios'
+import ky from 'ky'
 import { NextPage } from "next"
 import nanoid from 'nanoid'
 import { Base64 } from 'js-base64'
@@ -18,6 +19,8 @@ type Props = {
 const Page: NextPage<Props> = ({ id }) => {
   const OAUTH_CLIENT_ID = publicRuntimeConfig.OAUTH_CLIENT_ID
   const OAUTH_CALLBACK_URL = publicRuntimeConfig.OAUTH_CALLBACK_URL
+  const AQUIRER_SUBJECT = process.env.AQUIRER_SUBJECT || '$localhost:3001/checkout@merchant.com'
+  const AQUIRER_WALLET = process.env.AQUIRER_WALLET || 'http://localhost:3001'
 
   const [totalBurgers, setTotalBurgers] = useState(1)
   const [totalFries, setTotalFries] = useState(1)
@@ -35,46 +38,119 @@ const Page: NextPage<Props> = ({ id }) => {
   )
 
   const checkout = async (event: MouseEvent<HTMLButtonElement>) => {
+
     if (!isSubmitting && paymentPointer !== '') {
-      setIsSubmitting(true)
-      setPaymentPointerError('')
 
-      const sanitizedPP = paymentPointer.startsWith('$') ? 'https://' + paymentPointer.slice(1) : paymentPointer
-      console.log('Getting from ', sanitizedPP)
-      const response = await axios.get(sanitizedPP).then(response => {
-        return response.data
-      }).catch(error => {
-        console.log('error getting pp')
-        setPaymentPointerError('Invalid Payment Pointer')
-        setIsSubmitting(false)
-        throw error
-      })
-      console.log('Server meta data received from payment pointer: ', response)
-      console.log('Creating mandate at: ', response.payment_mandates_endpoint)
-      debugger
-      // create mandate
-      const { data } = await axios.post(response.payment_mandates_endpoint, {
-        asset: {code: 'USD', scale: 2},
-        amount: total.toString(),
-        scope: paymentPointer,
-        description: `ILP Eats Order ${id}`
-      })
+      // const sanitizedPP = paymentPointer.startsWith('$') ? 'https://' + paymentPointer.slice(1) : paymentPointer
+      // console.log('Getting from ', sanitizedPP)
+      // setIsSubmitting(true)
+      // setPaymentPointerError('')
+      // const response = await axios.get(sanitizedPP).then(response => {
+      //   return response.data
+      // }).catch(error => {
+      //   console.log('error getting pp')
+      //   setPaymentPointerError('Invalid Payment Pointer')
+      //   setIsSubmitting(false)
+      //   throw error
+      // })
 
-      const mandateId = data.id
+      if(window.PaymentRequest) {
+        // post invoice to wallet
+        console.log('invoice post', {
+          subject: AQUIRER_SUBJECT,
+          assetCode: "USD",
+          assetScale: 2,
+          amount: total,
+          description: "ILP Eats"
+        })
+        axios.post(AQUIRER_WALLET + '/invoices', {
+          subject: AQUIRER_SUBJECT,
+          assetCode: "USD",
+          assetScale: 2,
+          amount: total,
+          description: "ILP Eats"
+        }).then((response) => {
 
-      const state = Base64.encode(JSON.stringify({
-        mandate: data,
-        amount: total.toString(),
-        orderId: id
-      }), true)
+          const paymentMethodData: PaymentMethodData[] = [
+            {
+              supportedMethods: 'http://localhost:3000/',
+              data: {
+                invoice: response.data
+              }
+            }
+          ]
+    
+          const paymentDetailsInit: PaymentDetailsInit = {
+            total: {
+              label: 'ILP Eats',
+              amount: {
+                value: (total/100).toFixed(2).toString(),
+                currency: 'USD'
+              }
+            }
+          }
+    
+          const request = new PaymentRequest(paymentMethodData, paymentDetailsInit)
+          request.canMakePayment().then(() => {
+            request.show()
+            .then((paymentResponse) => {
+              console.log('PR successful', paymentResponse)
+              setIsSubmitting(false)
+            })
+            .catch((error) => {
+              console.log(error)
+              setIsSubmitting(false)
+            })
+          }).catch((err) => {
+            console.log('unable to process payment', err)
+          })
 
-      // request authorization for mandate
-      const authQuery = `?client_id=${OAUTH_CLIENT_ID}&response_type=code&scope=openid%20mandates.${mandateId}&state=${state}&redirect_uri=${OAUTH_CALLBACK_URL}`
-      console.log('Mandate created. ', data)
-      console.log('Redirecting to authorization endpoint to make an authorization request of:', authQuery.substring(1))
-      debugger
-      window.location.href = response.authorization_endpoint + authQuery
-      setIsSubmitting(false)
+        }).catch(err => {
+          console.log('Failed to gen invoice', err)
+        })
+
+      
+
+
+
+
+      } else {
+        // const response = await axios.get(sanitizedPP).then(response => {
+        //   return response.data
+        // }).catch(error => {
+        //   console.log('error getting pp')
+        //   setPaymentPointerError('Invalid Payment Pointer')
+        //   setIsSubmitting(false)
+        //   throw error
+        // })
+
+        // console.log('Server meta data received from payment pointer: ', response)
+        // console.log('Creating mandate at: ', response.payment_mandates_endpoint)
+        // debugger
+        // // create mandate
+        // const { data } = await axios.post(response.payment_mandates_endpoint, {
+        //   asset: {code: 'USD', scale: 2},
+        //   amount: total.toString(),
+        //   scope: paymentPointer,
+        //   description: `ILP Eats Order ${id}`
+        // })
+
+        // const mandateId = data.id
+
+        // const state = Base64.encode(JSON.stringify({
+        //   mandate: data,
+        //   amount: total.toString(),
+        //   orderId: id
+        // }), true)
+
+        // // request authorization for mandate
+        // const authQuery = `?client_id=${OAUTH_CLIENT_ID}&response_type=code&scope=openid%20mandates.${mandateId}&state=${state}&redirect_uri=${OAUTH_CALLBACK_URL}`
+        // console.log('Mandate created. ', data)
+        // console.log('Redirecting to authorization endpoint to make an authorization request of:', authQuery.substring(1))
+        // debugger
+        // window.location.href = response.authorization_endpoint + authQuery
+        // setIsSubmitting(false)
+      }
     }
     if (paymentPointer === '') {
       setPaymentPointerError('Please enter a payment pointer')
