@@ -6,6 +6,8 @@ import nanoid from 'nanoid'
 import { Base64 } from 'js-base64'
 import getConfig from 'next/config'
 
+const METHOD_NAME = process.env.METHOD_NAME || 'http://localhost:3000/'
+
 const { publicRuntimeConfig } = getConfig()
 
 const toVisibileValue = (amount: number) => {
@@ -28,6 +30,7 @@ const Page: NextPage<Props> = ({ id }) => {
   const [paymentPointer, setPaymentPointer] = useState('')
   const [paymentPointerError, setPaymentPointerError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [paymentComplete, setPaymentComplete] = useState(false)
 
 
   const total = useMemo(
@@ -39,7 +42,7 @@ const Page: NextPage<Props> = ({ id }) => {
 
   const checkout = async (event: MouseEvent<HTMLButtonElement>) => {
 
-    if (!isSubmitting && paymentPointer !== '') {
+    // if (!isSubmitting && paymentPointer !== '') {
 
       // const sanitizedPP = paymentPointer.startsWith('$') ? 'https://' + paymentPointer.slice(1) : paymentPointer
       // console.log('Getting from ', sanitizedPP)
@@ -54,8 +57,7 @@ const Page: NextPage<Props> = ({ id }) => {
       //   throw error
       // })
 
-      if(window.PaymentRequest) {
-        // post invoice to wallet
+      if(window.PaymentRequest && !paymentComplete) {
         console.log('invoice post', {
           subject: AQUIRER_SUBJECT,
           assetCode: "USD",
@@ -73,7 +75,7 @@ const Page: NextPage<Props> = ({ id }) => {
 
           const paymentMethodData: PaymentMethodData[] = [
             {
-              supportedMethods: 'http://localhost:3000/',
+              supportedMethods: METHOD_NAME,
               data: {
                 invoice: response.data
               }
@@ -94,12 +96,14 @@ const Page: NextPage<Props> = ({ id }) => {
           request.canMakePayment().then(() => {
             request.show()
             .then((paymentResponse) => {
+              paymentResponse.complete('success')
               console.log('PR successful', paymentResponse)
-              setIsSubmitting(false)
+              setPaymentComplete(true)
+              // setIsSubmitting(false)
             })
             .catch((error) => {
-              console.log(error)
-              setIsSubmitting(false)
+              console.log('show failed', error)
+              // setIsSubmitting(false)
             })
           }).catch((err) => {
             console.log('unable to process payment', err)
@@ -151,10 +155,10 @@ const Page: NextPage<Props> = ({ id }) => {
         // window.location.href = response.authorization_endpoint + authQuery
         // setIsSubmitting(false)
       }
-    }
-    if (paymentPointer === '') {
-      setPaymentPointerError('Please enter a payment pointer')
-    }
+    // }
+    // if (paymentPointer === '') {
+    //   setPaymentPointerError('Please enter a payment pointer')
+    // }
   }
 
   return (
@@ -234,13 +238,13 @@ const Page: NextPage<Props> = ({ id }) => {
         <div className="w-1/3 ml-4">
           <div className="bg-gray-100 h-full shadow rounded-lg flex flex-col px-6 py-12">
             <div className="text-gray-800 font-bold text-2xl">
-              Payments Details
+              Checkout With PaymentHandler
             </div>
             <div className="flex-1 flex flex-col justify-center">
               <div className="text-gray-700 my-4">
-                ILP Eats is powered by ILP.
-                Go to https://rafiki.money to get an ILP enabled account Today!
+                ILP Eats supports the rafiki.money payment method
               </div>
+              {/*
               <div className="flex items-center border-b border-b-2 border-teal-600 py-2 mt-4">
                 <input
                   value={paymentPointer}
@@ -254,13 +258,14 @@ const Page: NextPage<Props> = ({ id }) => {
               <div className="mt-2 text-xs text-red-700 h-12">
                 {paymentPointerError ? paymentPointerError : null}
               </div>
+                */}
             </div>
             <div className="w-full">
               <button
                 onClick={checkout}
                 className="w-full h-10 shadow bg-teal-500 hover:bg-teal-400 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded"
                 type="button">
-                {isSubmitting ? '...' : 'Checkout'}
+                {paymentComplete ? 'Paid' : 'Checkout'}
               </button>
             </div>
           </div>
