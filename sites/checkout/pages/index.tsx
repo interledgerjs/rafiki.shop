@@ -1,4 +1,4 @@
-import React, { useState, useMemo, MouseEvent } from 'react'
+import React, { useState, useMemo, MouseEvent, useEffect } from 'react'
 import axios from 'axios'
 import ky from 'ky'
 import { NextPage } from "next"
@@ -31,7 +31,7 @@ const Page: NextPage<Props> = ({ id }) => {
   const [paymentPointerError, setPaymentPointerError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [paymentComplete, setPaymentComplete] = useState(false)
-
+  const [paymentPointerRequired, setPaymentPointerRequired] = useState(false)
 
   const total = useMemo(
     () => {
@@ -40,24 +40,56 @@ const Page: NextPage<Props> = ({ id }) => {
     [totalBurgers, totalFries, totalMilkshakes]
   )
 
+  const ppCheckout = async () => {
+    if (paymentPointer !== ''){
+      const sanitizedPP = paymentPointer.startsWith('$') ? 'https://' + paymentPointer.slice(1) : paymentPointer
+      console.log('Getting from ', sanitizedPP)
+      setIsSubmitting(true)
+      setPaymentPointerError('')
+      const response = await axios.get(sanitizedPP).then(response => {
+        return response.data
+      }).catch(error => {
+        console.log('error getting pp')
+        setPaymentPointerError('Invalid Payment Pointer')
+        setIsSubmitting(false)
+        throw error
+      })
+
+      console.log('Server meta data received from payment pointer: ', response)
+      console.log('Creating mandate at: ', response.payment_mandates_endpoint)
+      debugger
+      // create mandate
+      const { data } = await axios.post(response.payment_mandates_endpoint, {
+        asset: {code: 'USD', scale: 2},
+        amount: total.toString(),
+        scope: paymentPointer,
+        description: `ILP Eats Order ${id}`
+      })
+
+      const mandateId = data.id
+
+      const state = Base64.encode(JSON.stringify({
+        mandate: data,
+        amount: total.toString(),
+        orderId: id
+      }), true)
+
+      // request authorization for mandate
+      const authQuery = `?client_id=${OAUTH_CLIENT_ID}&response_type=code&scope=openid%20mandates.${mandateId}&state=${state}&redirect_uri=${OAUTH_CALLBACK_URL}`
+      console.log('Mandate created. ', data)
+      console.log('Redirecting to authorization endpoint to make an authorization request of:', authQuery.substring(1))
+      debugger
+      window.location.href = response.authorization_endpoint + authQuery
+      setIsSubmitting(false)
+      
+    } else if (paymentPointer === '') {
+      setPaymentPointerError('Please enter a payment pointer')
+    }
+  }
+
   const checkout = async (event: MouseEvent<HTMLButtonElement>) => {
-
-    // if (!isSubmitting && paymentPointer !== '') {
-
-      // const sanitizedPP = paymentPointer.startsWith('$') ? 'https://' + paymentPointer.slice(1) : paymentPointer
-      // console.log('Getting from ', sanitizedPP)
-      // setIsSubmitting(true)
-      // setPaymentPointerError('')
-      // const response = await axios.get(sanitizedPP).then(response => {
-      //   return response.data
-      // }).catch(error => {
-      //   console.log('error getting pp')
-      //   setPaymentPointerError('Invalid Payment Pointer')
-      //   setIsSubmitting(false)
-      //   throw error
-      // })
-
-      if(window.PaymentRequest && !paymentComplete) {
+    if (!paymentComplete && !isSubmitting) {
+      if(window.PaymentRequest) {
         console.log('invoice post', {
           subject: AQUIRER_SUBJECT,
           assetCode: "USD",
@@ -93,72 +125,30 @@ const Page: NextPage<Props> = ({ id }) => {
           }
     
           const request = new PaymentRequest(paymentMethodData, paymentDetailsInit)
-          request.canMakePayment().then(() => {
+          request.canMakePayment().then((x) => {
+            console.log(x)
             request.show()
             .then((paymentResponse) => {
               paymentResponse.complete('success')
               console.log('PR successful', paymentResponse)
               setPaymentComplete(true)
-              // setIsSubmitting(false)
             })
             .catch((error) => {
               console.log('show failed', error)
-              // setIsSubmitting(false)
+              if (error.message != 'User closed the Payment Request UI.')
+              setPaymentPointerRequired(true)
             })
           }).catch((err) => {
             console.log('unable to process payment', err)
           })
 
         }).catch(err => {
-          console.log('Failed to gen invoice', err)
+          console.log('Failed to generate invoice', err)
         })
-
-      
-
-
-
-
       } else {
-        // const response = await axios.get(sanitizedPP).then(response => {
-        //   return response.data
-        // }).catch(error => {
-        //   console.log('error getting pp')
-        //   setPaymentPointerError('Invalid Payment Pointer')
-        //   setIsSubmitting(false)
-        //   throw error
-        // })
-
-        // console.log('Server meta data received from payment pointer: ', response)
-        // console.log('Creating mandate at: ', response.payment_mandates_endpoint)
-        // debugger
-        // // create mandate
-        // const { data } = await axios.post(response.payment_mandates_endpoint, {
-        //   asset: {code: 'USD', scale: 2},
-        //   amount: total.toString(),
-        //   scope: paymentPointer,
-        //   description: `ILP Eats Order ${id}`
-        // })
-
-        // const mandateId = data.id
-
-        // const state = Base64.encode(JSON.stringify({
-        //   mandate: data,
-        //   amount: total.toString(),
-        //   orderId: id
-        // }), true)
-
-        // // request authorization for mandate
-        // const authQuery = `?client_id=${OAUTH_CLIENT_ID}&response_type=code&scope=openid%20mandates.${mandateId}&state=${state}&redirect_uri=${OAUTH_CALLBACK_URL}`
-        // console.log('Mandate created. ', data)
-        // console.log('Redirecting to authorization endpoint to make an authorization request of:', authQuery.substring(1))
-        // debugger
-        // window.location.href = response.authorization_endpoint + authQuery
-        // setIsSubmitting(false)
+        setPaymentPointerRequired(true)
       }
-    // }
-    // if (paymentPointer === '') {
-    //   setPaymentPointerError('Please enter a payment pointer')
-    // }
+    }
   }
 
   return (
@@ -236,15 +226,36 @@ const Page: NextPage<Props> = ({ id }) => {
           </div>
         </div>
         <div className="w-1/3 ml-4">
-          <div className="bg-gray-100 h-full shadow rounded-lg flex flex-col px-6 py-12">
+
+          <div className={'bg-gray-100 h-full shadow rounded-lg flex flex-col px-6 py-12' + (paymentPointerRequired? ' hidden': '')}>
             <div className="text-gray-800 font-bold text-2xl">
-              Checkout With PaymentHandler
+              Checkout
             </div>
             <div className="flex-1 flex flex-col justify-center">
               <div className="text-gray-700 my-4">
-                ILP Eats supports the rafiki.money payment method
+                ILP Eats is powered by ILP.
+                Go to https://rafiki.money to get an ILP enabled account Today!
               </div>
-              {/*
+            </div>
+            <div className="w-full">
+              <button
+                onClick={checkout}
+                className="w-full h-10 shadow bg-teal-500 hover:bg-teal-400 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded"
+                type="button">
+                {paymentComplete ? 'Paid' : 'Checkout'}
+              </button>
+            </div>
+          </div>
+
+          <div className={'bg-gray-100 h-full shadow rounded-lg flex flex-col px-6 py-12' + (!paymentPointerRequired? ' hidden': '')}>
+            <div className="text-gray-800 font-bold text-2xl">
+              Payments Details
+            </div>
+            <div className="flex-1 flex flex-col justify-center">
+              <div className="text-gray-700 my-4">
+                Payment Handler is not available
+                Submit your payment pointer to checkout
+              </div>
               <div className="flex items-center border-b border-b-2 border-teal-600 py-2 mt-4">
                 <input
                   value={paymentPointer}
@@ -258,14 +269,13 @@ const Page: NextPage<Props> = ({ id }) => {
               <div className="mt-2 text-xs text-red-700 h-12">
                 {paymentPointerError ? paymentPointerError : null}
               </div>
-                */}
             </div>
             <div className="w-full">
               <button
-                onClick={checkout}
+                onClick={ppCheckout}
                 className="w-full h-10 shadow bg-teal-500 hover:bg-teal-400 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded"
                 type="button">
-                {paymentComplete ? 'Paid' : 'Checkout'}
+                {isSubmitting ? '...' : 'Pay'}
               </button>
             </div>
           </div>
