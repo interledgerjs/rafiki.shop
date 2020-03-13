@@ -1,6 +1,5 @@
 import React, { useState, useMemo, MouseEvent, useEffect } from 'react'
 import axios from 'axios'
-import ky from 'ky'
 import { NextPage } from "next"
 import nanoid from 'nanoid'
 import { Base64 } from 'js-base64'
@@ -43,20 +42,16 @@ const Page: NextPage<Props> = ({ id }) => {
   const ppCheckout = async () => {
     if (paymentPointer !== ''){
       const sanitizedPP = paymentPointer.startsWith('$') ? 'https://' + paymentPointer.slice(1) : paymentPointer
-      console.log('Getting from ', sanitizedPP)
       setIsSubmitting(true)
       setPaymentPointerError('')
       const response = await axios.get(sanitizedPP).then(response => {
         return response.data
       }).catch(error => {
-        console.log('error getting pp')
         setPaymentPointerError('Invalid Payment Pointer')
         setIsSubmitting(false)
         throw error
       })
-
-      console.log('Server meta data received from payment pointer: ', response)
-      console.log('Creating mandate at: ', response.payment_mandates_endpoint)
+      
       debugger
       // create mandate
       const { data } = await axios.post(response.payment_mandates_endpoint, {
@@ -76,8 +71,6 @@ const Page: NextPage<Props> = ({ id }) => {
 
       // request authorization for mandate
       const authQuery = `?client_id=${OAUTH_CLIENT_ID}&response_type=code&scope=openid%20mandates.${mandateId}&state=${state}&redirect_uri=${OAUTH_CALLBACK_URL}`
-      console.log('Mandate created. ', data)
-      console.log('Redirecting to authorization endpoint to make an authorization request of:', authQuery.substring(1))
       debugger
       window.location.href = response.authorization_endpoint + authQuery
       setIsSubmitting(false)
@@ -90,13 +83,6 @@ const Page: NextPage<Props> = ({ id }) => {
   const checkout = async (event: MouseEvent<HTMLButtonElement>) => {
     if (!paymentComplete && !isSubmitting) {
       if(window.PaymentRequest) {
-        console.log('invoice post', {
-          subject: AQUIRER_SUBJECT,
-          assetCode: "USD",
-          assetScale: 2,
-          amount: total,
-          description: "ILP Eats"
-        })
         axios.post(AQUIRER_WALLET + '/invoices', {
           subject: AQUIRER_SUBJECT,
           assetCode: "USD",
@@ -126,7 +112,6 @@ const Page: NextPage<Props> = ({ id }) => {
     
           const request = new PaymentRequest(paymentMethodData, paymentDetailsInit)
           request.canMakePayment().then((x) => {
-            console.log(x)
             request.show()
             .then((paymentResponse) => {
               paymentResponse.complete('success')
@@ -134,7 +119,6 @@ const Page: NextPage<Props> = ({ id }) => {
               setPaymentComplete(true)
             })
             .catch((error) => {
-              console.log('show failed', error)
               if (error.message != 'User closed the Payment Request UI.')
               setPaymentPointerRequired(true)
             })
