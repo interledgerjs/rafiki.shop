@@ -15,6 +15,22 @@ type Props = {
   id: string
 }
 
+type AuthorizationDetail = {
+  type: 'open_payments_mandate';
+  locations: string[];
+  actions: string[];
+}
+
+type MandateInfo = {
+  id: string;
+  name: string;
+  description: string;
+  assetCode: string;
+  assetScale: number;
+  amount: string;
+  balance: string;
+}
+
 const Page: NextPage<Props> = ({ id }) => {
   const OAUTH_CLIENT_ID = publicRuntimeConfig.OAUTH_CLIENT_ID
   const OAUTH_CALLBACK_URL = publicRuntimeConfig.OAUTH_CALLBACK_URL
@@ -34,12 +50,25 @@ const Page: NextPage<Props> = ({ id }) => {
     [totalBurgers, totalFries, totalMilkshakes]
   )
 
+  const buildAuthorizationDetails = (mandate: MandateInfo): AuthorizationDetail[] => {
+    return [
+      {
+        type: 'open_payments_mandate',
+        locations: [mandate.name],
+        actions: [
+          'read',
+          'charge'
+        ]
+      }
+    ]
+  }
+
   const checkout = async (event: MouseEvent<HTMLButtonElement>) => {
     if (!isSubmitting && paymentPointer !== '') {
       setIsSubmitting(true)
       setPaymentPointerError('')
 
-      const sanitizedPP = paymentPointer.startsWith('$') ? 'https://' + paymentPointer.slice(1) : paymentPointer
+      const sanitizedPP = paymentPointer.startsWith('$') ? 'http://' + paymentPointer.slice(1) : paymentPointer
       console.log('Getting from ', sanitizedPP)
       const response = await axios.get(sanitizedPP).then(response => {
         return response.data
@@ -50,17 +79,16 @@ const Page: NextPage<Props> = ({ id }) => {
         throw error
       })
       console.log('Server meta data received from payment pointer: ', response)
-      console.log('Creating mandate at: ', response.payment_mandates_endpoint)
+      console.log('Creating mandate at: ', response.mandates_endpoint)
       debugger
       // create mandate
-      const { data } = await axios.post(response.payment_mandates_endpoint, {
-        asset: {code: 'USD', scale: 2},
+      const { data } = await axios.post<MandateInfo>(response.mandates_endpoint, {
+        assetCode: 'USD',
+        assetScale: 2,
         amount: total.toString(),
         scope: paymentPointer,
         description: `ILP Eats Order ${id}`
       })
-
-      const mandateId = data.id
 
       const state = Base64.encode(JSON.stringify({
         mandate: data,
@@ -69,7 +97,8 @@ const Page: NextPage<Props> = ({ id }) => {
       }), true)
 
       // request authorization for mandate
-      const authQuery = `?client_id=${OAUTH_CLIENT_ID}&response_type=code&scope=openid%20mandates.${mandateId}&state=${state}&redirect_uri=${OAUTH_CALLBACK_URL}`
+      const authorizationDetails = buildAuthorizationDetails(data)
+      const authQuery = `?client_id=${OAUTH_CLIENT_ID}&response_type=code&scope=openid&state=${state}&redirect_uri=${OAUTH_CALLBACK_URL}&authorization_details=${JSON.stringify(authorizationDetails)}`
       console.log('Mandate created. ', data)
       console.log('Redirecting to authorization endpoint to make an authorization request of:', authQuery.substring(1))
       debugger
