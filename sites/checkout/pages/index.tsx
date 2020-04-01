@@ -5,7 +5,7 @@ import nanoid from 'nanoid'
 import { Base64 } from 'js-base64'
 import getConfig from 'next/config'
 
-const METHOD_NAME = process.env.METHOD_NAME || 'http://localhost:3000/'
+const methodName = process.env.METHOD_NAME || 'http://localhost:3000/'
 
 const { publicRuntimeConfig } = getConfig()
 
@@ -80,6 +80,48 @@ const Page: NextPage<Props> = ({ id }) => {
     }
   }
 
+  const checkCanMakePayment = async (request) => {
+    if (!request.canMakePayment) {
+      return
+    }
+
+    try {
+      const result = await request.canMakePayment()
+      console.info(result ? "Can make payment" : "Cannot make payment")
+    } catch (e) {
+      console.error(e.toString())
+    }
+  }
+
+  const checkHasEnrolledInstrument = async (request) => {
+    if (!request.hasEnrolledInstrument) {
+      return
+    }
+
+    try {
+      const result = await request.hasEnrolledInstrument()
+      console.info(result ? "Has enrolled instrument" : "No enrolled instrument")
+    } catch (e) {
+      console.error(e.toString())
+    }
+  }
+  
+  const initiatePaymentRequest = async (request) => {
+    if (!request) {
+      return
+    }
+  
+    try {
+      const instrumentResponse = await request.show()
+      await instrumentResponse.complete('success')
+      setPaymentComplete(true)
+      console.info('This is a demo website. No payment will be processed.', instrumentResponse)
+    } catch (e) {
+      console.error(e.toString())
+      setPaymentPointerRequired(true)
+    }
+  }
+
   const checkout = async (event: MouseEvent<HTMLButtonElement>) => {
     if (!paymentComplete && !isSubmitting) {
       if(window.PaymentRequest) {
@@ -93,7 +135,7 @@ const Page: NextPage<Props> = ({ id }) => {
 
           const paymentMethodData: PaymentMethodData[] = [
             {
-              supportedMethods: METHOD_NAME,
+              supportedMethods: methodName,
               data: {
                 invoice: response.data
               }
@@ -109,22 +151,20 @@ const Page: NextPage<Props> = ({ id }) => {
               }
             }
           }
-    
-          const request = new PaymentRequest(paymentMethodData, paymentDetailsInit)
-          request.canMakePayment().then((x) => {
-            request.show()
-            .then((paymentResponse) => {
-              paymentResponse.complete('success')
-              console.log('PR successful', paymentResponse)
-              setPaymentComplete(true)
-            })
-            .catch((error) => {
-              if (error.message != 'User closed the Payment Request UI.')
-              setPaymentPointerRequired(true)
-            })
-          }).catch((err) => {
-            console.log('unable to process payment', err)
-          })
+          let request
+  
+          try {
+            request = new PaymentRequest(paymentMethodData, paymentDetailsInit)
+          } catch (e) {
+            console.error(e.toString())
+            setPaymentPointerRequired(true)
+            return null
+          }
+          
+          checkCanMakePayment(request)
+          checkHasEnrolledInstrument(request)
+
+          initiatePaymentRequest(request)
 
         }).catch(err => {
           console.log('Failed to generate invoice', err)
@@ -140,15 +180,15 @@ const Page: NextPage<Props> = ({ id }) => {
       <div className="max-w-5xl mx-auto mt-8 text-4xl text-gray-800">
         ILP EATS
       </div>
-      <div className="max-w-5xl flex shadow-lg rounded-lg bg-white mx-auto px-16 py-16 mt-16">
-        <div className="w-2/3 flex flex-col ">
+      <div className="max-w-sm sm:max-w-5xl flex flex-col sm:flex-row shadow-lg rounded-lg bg-white mx-auto px-16 py-16 mt-16">
+        <div className="w-full sm:w-2/3 flex flex-col">
           <div className="my-4 text-gray-600 text-2xl">
             Cart
           </div>
           <div className="flex-1">
             <div className="flex my-4">
               <div className="mr-2">
-                <img className="rounded-full" src="https://source.unsplash.com/88YAXjnpvrM/100x100"/>
+                <img className="rounded-full h-10" src="https://source.unsplash.com/88YAXjnpvrM/100x100"/>
               </div>
               <div className="flex flex-1 my-auto mx-2 text-gray-600 justify-center">
                 Hamburger
@@ -165,7 +205,7 @@ const Page: NextPage<Props> = ({ id }) => {
             <div className="border-b border-gray-500"/>
             <div className="flex my-4">
               <div className="mr-2">
-                <img className="rounded-full" src="https://source.unsplash.com/vi0kZuoe0-8/100x100"/>
+                <img className="rounded-full h-10" src="https://source.unsplash.com/vi0kZuoe0-8/100x100"/>
               </div>
               <div className="flex flex-1 my-auto mx-2 text-gray-600 justify-center">
                 Fries
@@ -175,14 +215,14 @@ const Page: NextPage<Props> = ({ id }) => {
                        value={totalFries}
                        onChange={(event) => setTotalFries(event.target.value ? parseInt(event.target.value) : 0)}/>
               </div>
-              <div className="flex flex-1 my-auto mx-2 text-gray-600 text-lg">
+              <div className="flex flex-1 my-auto mx-2 text-gray-600 text-lg self-end">
                 $2.99
               </div>
             </div>
             <div className="border-b border-gray-500"/>
             <div className="flex my-4">
               <div className="mr-2">
-                <img className="rounded-full" src="https://source.unsplash.com/gjFfm8ADhQw/100x100"/>
+                <img className="rounded-full h-10" src="https://source.unsplash.com/gjFfm8ADhQw/100x100"/>
               </div>
               <div className="flex flex-1 my-auto mx-2 text-gray-600 justify-center">
                 Milkshake
@@ -209,7 +249,7 @@ const Page: NextPage<Props> = ({ id }) => {
             </div>
           </div>
         </div>
-        <div className="w-1/3 ml-4">
+        <div className="w-full sm:w-1/3 sm:ml-4">
 
           <div className={'bg-gray-100 h-full shadow rounded-lg flex flex-col px-6 py-12' + (paymentPointerRequired? ' hidden': '')}>
             <div className="text-gray-800 font-bold text-2xl">
