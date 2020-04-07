@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3006",
     "build": "next build",
     "start": "next start"
   },
@@ -12,6 +12,7 @@
     "got": "^9.6.0",
     "ilp-protocol-stream": "^2.2.0",
     "js-base64": "^2.5.1",
+    "ky": "^0.18.0",
     "nanoid": "^2.1.6",
     "next": "9.1.2",
     "openid-client": "^3.8.2",

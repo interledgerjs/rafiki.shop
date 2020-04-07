@@ -1,9 +1,11 @@
-import React, { useState, useMemo, MouseEvent } from 'react'
+import React, { useState, useMemo, MouseEvent, useEffect } from 'react'
 import axios from 'axios'
 import { NextPage } from "next"
 import nanoid from 'nanoid'
 import { Base64 } from 'js-base64'
 import getConfig from 'next/config'
+
+const methodName = process.env.METHOD_NAME || 'http://localhost:3000/'
 
 const { publicRuntimeConfig } = getConfig()
 
@@ -18,6 +20,8 @@ type Props = {
 const Page: NextPage<Props> = ({ id }) => {
   const OAUTH_CLIENT_ID = publicRuntimeConfig.OAUTH_CLIENT_ID
   const OAUTH_CALLBACK_URL = publicRuntimeConfig.OAUTH_CALLBACK_URL
+  const AQUIRER_SUBJECT = process.env.AQUIRER_SUBJECT || '$localhost:3001/checkout@merchant.com'
+  const AQUIRER_WALLET = process.env.AQUIRER_WALLET || 'http://localhost:3001'
 
   const [totalBurgers, setTotalBurgers] = useState(1)
   const [totalFries, setTotalFries] = useState(1)
@@ -25,7 +29,8 @@ const Page: NextPage<Props> = ({ id }) => {
   const [paymentPointer, setPaymentPointer] = useState('')
   const [paymentPointerError, setPaymentPointerError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
-
+  const [paymentComplete, setPaymentComplete] = useState(false)
+  const [paymentPointerRequired, setPaymentPointerRequired] = useState(false)
 
   const total = useMemo(
     () => {
@@ -34,23 +39,19 @@ const Page: NextPage<Props> = ({ id }) => {
     [totalBurgers, totalFries, totalMilkshakes]
   )
 
-  const checkout = async (event: MouseEvent<HTMLButtonElement>) => {
-    if (!isSubmitting && paymentPointer !== '') {
+  const ppCheckout = async () => {
+    if (paymentPointer !== ''){
+      const sanitizedPP = paymentPointer.startsWith('$') ? 'https://' + paymentPointer.slice(1) : paymentPointer
       setIsSubmitting(true)
       setPaymentPointerError('')
-
-      const sanitizedPP = paymentPointer.startsWith('$') ? 'https://' + paymentPointer.slice(1) : paymentPointer
-      console.log('Getting from ', sanitizedPP)
       const response = await axios.get(sanitizedPP).then(response => {
         return response.data
       }).catch(error => {
-        console.log('error getting pp')
         setPaymentPointerError('Invalid Payment Pointer')
         setIsSubmitting(false)
         throw error
       })
-      console.log('Server meta data received from payment pointer: ', response)
-      console.log('Creating mandate at: ', response.payment_mandates_endpoint)
+      
       debugger
       // create mandate
       const { data } = await axios.post(response.payment_mandates_endpoint, {
@@ -70,14 +71,107 @@ const Page: NextPage<Props> = ({ id }) => {
 
       // request authorization for mandate
       const authQuery = `?client_id=${OAUTH_CLIENT_ID}&response_type=code&scope=openid%20mandates.${mandateId}&state=${state}&redirect_uri=${OAUTH_CALLBACK_URL}`
-      console.log('Mandate created. ', data)
-      console.log('Redirecting to authorization endpoint to make an authorization request of:', authQuery.substring(1))
       debugger
       window.location.href = response.authorization_endpoint + authQuery
       setIsSubmitting(false)
-    }
-    if (paymentPointer === '') {
+      
+    } else if (paymentPointer === '') {
       setPaymentPointerError('Please enter a payment pointer')
+    }
+  }
+
+  const checkCanMakePayment = async (request) => {
+    if (!request.canMakePayment) {
+      return
+    }
+
+    try {
+      const result = await request.canMakePayment()
+      console.info(result ? "Can make payment" : "Cannot make payment")
+    } catch (e) {
+      console.error(e.toString())
+    }
+  }
+
+  const checkHasEnrolledInstrument = async (request) => {
+    if (!request.hasEnrolledInstrument) {
+      return
+    }
+
+    try {
+      const result = await request.hasEnrolledInstrument()
+      console.info(result ? "Has enrolled instrument" : "No enrolled instrument")
+    } catch (e) {
+      console.error(e.toString())
+    }
+  }
+  
+  const initiatePaymentRequest = async (request) => {
+    if (!request) {
+      return
+    }
+  
+    try {
+      const instrumentResponse = await request.show()
+      await instrumentResponse.complete('success')
+      setPaymentComplete(true)
+      console.info('This is a demo website. No payment will be processed.', instrumentResponse)
+    } catch (e) {
+      console.error(e.toString())
+      setPaymentPointerRequired(true)
+    }
+  }
+
+  const checkout = async (event: MouseEvent<HTMLButtonElement>) => {
+    if (!paymentComplete && !isSubmitting) {
+      if(window.PaymentRequest) {
+        axios.post(AQUIRER_WALLET + '/invoices', {
+          subject: AQUIRER_SUBJECT,
+          assetCode: "USD",
+          assetScale: 2,
+          amount: total,
+          description: "ILP Eats"
+        }).then((response) => {
+
+          const paymentMethodData: PaymentMethodData[] = [
+            {
+              supportedMethods: methodName,
+              data: {
+                invoice: response.data
+              }
+            }
+          ]
+    
+          const paymentDetailsInit: PaymentDetailsInit = {
+            total: {
+              label: 'ILP Eats',
+              amount: {
+                value: (total/100).toFixed(2).toString(),
+                currency: 'USD'
+              }
+            }
+          }
+          let request
+  
+          try {
+            request = new PaymentRequest(paymentMethodData, paymentDetailsInit)
+          } catch (e) {
+            console.error(e.toString())
+            setPaymentPointerRequired(true)
+            return null
+          }
+          
+          checkCanMakePayment(request)
+          checkHasEnrolledInstrument(request)
+
+          initiatePaymentRequest(request)
+
+        }).catch(err => {
+          console.log('Failed to generate invoice', err)
+        })
+      } else {
+        setPaymentPointerRequired(true)
+      }
     }
   }
 
@@ -86,15 +180,15 @@ const Page: NextPage<Props> = ({ id }) => {
       <div className="max-w-5xl mx-auto mt-8 text-4xl text-gray-800">
         ILP EATS
       </div>
-      <div className="max-w-5xl flex shadow-lg rounded-lg bg-white mx-auto px-16 py-16 mt-16">
-        <div className="w-2/3 flex flex-col ">
+      <div className="max-w-sm sm:max-w-5xl flex flex-col sm:flex-row shadow-lg rounded-lg bg-white mx-auto px-16 py-16 mt-16">
+        <div className="w-full sm:w-2/3 flex flex-col">
           <div className="my-4 text-gray-600 text-2xl">
             Cart
           </div>
           <div className="flex-1">
             <div className="flex my-4">
               <div className="mr-2">
-                <img className="rounded-full" src="https://source.unsplash.com/88YAXjnpvrM/100x100"/>
+                <img className="rounded-full h-10" src="https://source.unsplash.com/88YAXjnpvrM/100x100"/>
               </div>
               <div className="flex flex-1 my-auto mx-2 text-gray-600 justify-center">
                 Hamburger
@@ -111,7 +205,7 @@ const Page: NextPage<Props> = ({ id }) => {
             <div className="border-b border-gray-500"/>
             <div className="flex my-4">
               <div className="mr-2">
-                <img className="rounded-full" src="https://source.unsplash.com/vi0kZuoe0-8/100x100"/>
+                <img className="rounded-full h-10" src="https://source.unsplash.com/vi0kZuoe0-8/100x100"/>
               </div>
               <div className="flex flex-1 my-auto mx-2 text-gray-600 justify-center">
                 Fries
@@ -121,14 +215,14 @@ const Page: NextPage<Props> = ({ id }) => {
                        value={totalFries}
                        onChange={(event) => setTotalFries(event.target.value ? parseInt(event.target.value) : 0)}/>
               </div>
-              <div className="flex flex-1 my-auto mx-2 text-gray-600 text-lg">
+              <div className="flex flex-1 my-auto mx-2 text-gray-600 text-lg self-end">
                 $2.99
               </div>
             </div>
             <div className="border-b border-gray-500"/>
             <div className="flex my-4">
               <div className="mr-2">
-                <img className="rounded-full" src="https://source.unsplash.com/gjFfm8ADhQw/100x100"/>
+                <img className="rounded-full h-10" src="https://source.unsplash.com/gjFfm8ADhQw/100x100"/>
               </div>
               <div className="flex flex-1 my-auto mx-2 text-gray-600 justify-center">
                 Milkshake
@@ -155,15 +249,36 @@ const Page: NextPage<Props> = ({ id }) => {
             </div>
           </div>
         </div>
-        <div className="w-1/3 ml-4">
-          <div className="bg-gray-100 h-full shadow rounded-lg flex flex-col px-6 py-12">
+        <div className="w-full sm:w-1/3 sm:ml-4">
+
+          <div className={'bg-gray-100 h-full shadow rounded-lg flex flex-col px-6 py-12' + (paymentPointerRequired? ' hidden': '')}>
             <div className="text-gray-800 font-bold text-2xl">
-              Payments Details
+              Checkout
             </div>
             <div className="flex-1 flex flex-col justify-center">
               <div className="text-gray-700 my-4">
                 ILP Eats is powered by ILP.
                 Go to https://rafiki.money to get an ILP enabled account Today!
+              </div>
+            </div>
+            <div className="w-full">
+              <button
+                onClick={checkout}
+                className="w-full h-10 shadow bg-teal-500 hover:bg-teal-400 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded"
+                type="button">
+                {paymentComplete ? 'Paid' : 'Checkout'}
+              </button>
+            </div>
+          </div>
+
+          <div className={'bg-gray-100 h-full shadow rounded-lg flex flex-col px-6 py-12' + (!paymentPointerRequired? ' hidden': '')}>
+            <div className="text-gray-800 font-bold text-2xl">
+              Payments Details
+            </div>
+            <div className="flex-1 flex flex-col justify-center">
+              <div className="text-gray-700 my-4">
+                Payment Handler is not available
+                Submit your payment pointer to checkout
               </div>
               <div className="flex items-center border-b border-b-2 border-teal-600 py-2 mt-4">
                 <input
@@ -181,10 +296,10 @@ const Page: NextPage<Props> = ({ id }) => {
             </div>
             <div className="w-full">
               <button
-                onClick={checkout}
+                onClick={ppCheckout}
                 className="w-full h-10 shadow bg-teal-500 hover:bg-teal-400 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded"
                 type="button">
-                {isSubmitting ? '...' : 'Checkout'}
+                {isSubmitting ? '...' : 'Pay'}
               </button>
             </div>
           </div>
