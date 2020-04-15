@@ -115,7 +115,7 @@ Page.getInitialProps = async ({query}) => {
 
   // console.log(issuer)
   //Do some upfront work to cover+ the code into
-  const decodedState = JSON.parse(Base64.decode(state))
+  const decodedState = JSON.parse('')
 
   console.log(decodedState)
   return {
