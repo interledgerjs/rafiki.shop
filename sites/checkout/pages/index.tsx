@@ -1,9 +1,13 @@
-import React, { useState, useMemo, MouseEvent, useEffect } from 'react'
+import React, { useState, useMemo, FC, useRef, useEffect } from 'react'
 import axios from 'axios'
 import { NextPage } from "next"
 import nanoid from 'nanoid'
 import { Base64 } from 'js-base64'
 import getConfig from 'next/config'
+import { OpenPaymentsButton } from '../components/open-payments-button'
+import QRCode from 'qrcode.react'
+import {CopyToClipboard} from 'react-copy-to-clipboard';
+import { CheckmarkOutline } from '../components/icons/checkmark-outline'
 
 const methodName = process.env.METHOD_NAME || 'http://localhost:3000/'
 
@@ -17,20 +21,120 @@ type Props = {
   id: string
 }
 
+export function useInterval(callback, delay) {
+  const savedCallback = useRef<any>();
+
+  // Remember the latest callback.
+  useEffect(() => {
+    savedCallback.current = callback;
+  }, [callback]);
+
+  // Set up the interval.
+  useEffect(() => {
+    function tick() {
+      savedCallback.current();
+    }
+    if (delay !== null) {
+      let id = setInterval(tick, delay);
+      return () => clearInterval(id);
+    }
+  }, [delay]);
+}
+
+const DisplayCheckout: FC<{checkout: () => void}> = ({checkout}) => {
+  return (
+    <div className='bg-gray-100 h-full shadow rounded-lg flex flex-col px-6 py-12'>
+      <div className="text-gray-800 font-bold text-2xl">
+        Checkout
+      </div>
+      <div className="flex-1 flex flex-col justify-center">
+        <div className="text-gray-700 my-4">
+          ILP Eats is powered by Open Payments. Go to <a href="https://rafiki.money" target='_blank'>https://rafiki.money</a> to get an Open Payments enabled account Today!
+        </div>
+      </div>
+      <div className="w-full">
+        <OpenPaymentsButton
+          onClick={checkout}
+        />
+      </div>
+    </div>
+  )
+}
+
+const DisplayInvoiceDetails: FC<any> = ({invoice, setPaymentComplete}) => {
+
+  const invoiceUrl = "https:" + invoice.name
+
+  useInterval(() => {
+    axios.get(invoiceUrl).then((response) => {
+     const inv = response.data
+      if(inv.amount === inv.received) {
+        setPaymentComplete(true)
+      }
+    })
+  }, 500)
+
+  return (
+    <div className='bg-gray-100 h-full shadow rounded-lg flex flex-col px-6 py-12'>
+      <div className="text-gray-800 font-bold text-2xl text-center">
+        Payments Details
+      </div>
+      <div className="flex-1 flex flex-col justify-center">
+        <QRCode
+          className="mx-auto my-8"
+          value={invoice.name}
+          size={128}
+          bgColor={"#ffffff"}
+          fgColor={"#000000"}
+          level={"L"}
+          includeMargin={false}
+          renderAs={"svg"}
+        />
+      </div>
+      <CopyToClipboard text={invoice.name}>
+        <div className="bg-white focus:outline-none focus:shadow-outline border border-gray-300 rounded-lg py-2 px-4 block w-full appearance-none leading-normal">
+            {invoice.name}
+        </div>
+      </CopyToClipboard>
+    </div>
+  )
+}
+
+const DisplayPaymentComplete: FC<any> = ({reset}) => {
+  return (
+    <div className='bg-gray-100 h-full shadow rounded-lg flex flex-col px-6 py-12'>
+      <div className="text-gray-800 font-bold text-2xl">
+        Payment Complete
+      </div>
+      <div className="flex-1 flex flex-col justify-center">
+        <CheckmarkOutline className="h-32"/>
+      </div>
+      <div onClick={reset} className="flex justify-center mt-4">
+        <div className="ml-4 rounded-lg px-4 md:px-5 xl:px-4 py-3 md:py-4 xl:py-3 bg-white hover:bg-gray-200 md:text-lg xl:text-base text-gray-800 font-semibold leading-tight shadow-md">
+          Restart
+        </div>
+      </div>
+    </div>
+  )
+}
+
 const Page: NextPage<Props> = ({ id }) => {
-  const OAUTH_CLIENT_ID = publicRuntimeConfig.OAUTH_CLIENT_ID
-  const OAUTH_CALLBACK_URL = publicRuntimeConfig.OAUTH_CALLBACK_URL
-  const AQUIRER_SUBJECT = process.env.AQUIRER_SUBJECT || '$localhost:3001/checkout@merchant.com'
-  const AQUIRER_WALLET = process.env.AQUIRER_WALLET || 'http://localhost:3001'
+  const ACQUIRER_SUBJECT = process.env.AQUIRER_SUBJECT || '$rafiki.money/p/eats@rafiki.shop'
+  const ACQUIRER_WALLET_INVOICES = process.env.AQUIRER_WALLET || 'https://rafiki.money/api/invoices'
 
   const [totalBurgers, setTotalBurgers] = useState(1)
   const [totalFries, setTotalFries] = useState(1)
   const [totalMilkshakes, setTotalMilkshakes] = useState(1)
-  const [paymentPointer, setPaymentPointer] = useState('')
-  const [paymentPointerError, setPaymentPointerError] = useState('')
+
+
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [invoice, setInvoice] = useState<any>()
   const [paymentComplete, setPaymentComplete] = useState(false)
-  const [paymentPointerRequired, setPaymentPointerRequired] = useState(false)
+
+  const reset = () => {
+    setInvoice(undefined)
+    setPaymentComplete(false)
+  }
 
   const total = useMemo(
     () => {
@@ -39,46 +143,6 @@ const Page: NextPage<Props> = ({ id }) => {
     [totalBurgers, totalFries, totalMilkshakes]
   )
 
-  const ppCheckout = async () => {
-    if (paymentPointer !== ''){
-      const sanitizedPP = paymentPointer.startsWith('$') ? 'https://' + paymentPointer.slice(1) : paymentPointer
-      setIsSubmitting(true)
-      setPaymentPointerError('')
-      const response = await axios.get(sanitizedPP).then(response => {
-        return response.data
-      }).catch(error => {
-        setPaymentPointerError('Invalid Payment Pointer')
-        setIsSubmitting(false)
-        throw error
-      })
-      
-      debugger
-      // create mandate
-      const { data } = await axios.post(response.payment_mandates_endpoint, {
-        asset: {code: 'USD', scale: 2},
-        amount: total.toString(),
-        scope: paymentPointer,
-        description: `ILP Eats Order ${id}`
-      })
-
-      const mandateId = data.id
-
-      const state = Base64.encode(JSON.stringify({
-        mandate: data,
-        amount: total.toString(),
-        orderId: id
-      }), true)
-
-      // request authorization for mandate
-      const authQuery = `?client_id=${OAUTH_CLIENT_ID}&response_type=code&scope=openid%20mandates.${mandateId}&state=${state}&redirect_uri=${OAUTH_CALLBACK_URL}`
-      debugger
-      window.location.href = response.authorization_endpoint + authQuery
-      setIsSubmitting(false)
-      
-    } else if (paymentPointer === '') {
-      setPaymentPointerError('Please enter a payment pointer')
-    }
-  }
 
   const checkCanMakePayment = async (request) => {
     if (!request.canMakePayment) {
@@ -118,61 +182,58 @@ const Page: NextPage<Props> = ({ id }) => {
       console.info('This is a demo website. No payment will be processed.', instrumentResponse)
     } catch (e) {
       console.error(e.toString())
-      setPaymentPointerRequired(true)
     }
   }
 
-  const checkout = async (event: MouseEvent<HTMLButtonElement>) => {
-    if (!paymentComplete && !isSubmitting) {
-      if(window.PaymentRequest) {
-        axios.post(AQUIRER_WALLET + '/invoices', {
-          subject: AQUIRER_SUBJECT,
-          assetCode: "USD",
-          assetScale: 2,
-          amount: total,
-          description: "ILP Eats"
-        }).then((response) => {
+  const checkout = async () => {
+    // Generate Invoice
+    const invoice = await axios.post(ACQUIRER_WALLET_INVOICES, {
+      subject: ACQUIRER_SUBJECT,
+      assetCode: "USD",
+      assetScale: 6,
+      amount: total*10000,
+      description: "ILP Eats Order"
+    }).then(response => response.data)
 
-          const paymentMethodData: PaymentMethodData[] = [
-            {
-              supportedMethods: methodName,
-              data: {
-                invoice: response.data
-              }
-            }
-          ]
-    
-          const paymentDetailsInit: PaymentDetailsInit = {
-            total: {
-              label: 'ILP Eats',
-              amount: {
-                value: (total/100).toFixed(2).toString(),
-                currency: 'USD'
-              }
-            }
-          }
-          let request
-  
-          try {
-            request = new PaymentRequest(paymentMethodData, paymentDetailsInit)
-          } catch (e) {
-            console.error(e.toString())
-            setPaymentPointerRequired(true)
-            return null
-          }
-          
-          checkCanMakePayment(request)
-          checkHasEnrolledInstrument(request)
+    // If Payment Handler Show it
+    {/*if (window.PaymentRequest) {*/}
+    //     const paymentMethodData: PaymentMethodData[] = [
+    //       {
+    //         supportedMethods: methodName,
+    {/*        data: {*/}
+    {/*          invoice*/}
+    {/*        }*/}
+    {/*      }*/}
+    {/*    ]*/}
 
-          initiatePaymentRequest(request)
+    //     const paymentDetailsInit: PaymentDetailsInit = {
+    //       total: {
+    //         label: 'ILP Eats',
+    {/*        amount: {*/}
+    //           value: (total/100).toFixed(2).toString(),
+    //           currency: 'USD'
+    //         }
+    //       }
+    //     }
+    //     let request
+    //
+    //     try {
+    //       request = new PaymentRequest(paymentMethodData, paymentDetailsInit)
+    //     } catch (e) {
+    //       console.error(e.toString())
+    //       setPaymentPointerRequired(true)
+    //       return null
+    //     }
+    //
+    //     await checkCanMakePayment(request)
+    //     await checkHasEnrolledInstrument(request)
+    //
+    //     await initiatePaymentRequest(request)
+    // }
 
-        }).catch(err => {
-          console.log('Failed to generate invoice', err)
-        })
-      } else {
-        setPaymentPointerRequired(true)
-      }
-    }
+    // Else display invoice details
+    setInvoice(invoice)
+
   }
 
   return (
@@ -180,7 +241,7 @@ const Page: NextPage<Props> = ({ id }) => {
       <div className="max-w-5xl mx-auto mt-8 text-4xl text-gray-800">
         ILP EATS
       </div>
-      <div className="max-w-sm sm:max-w-5xl flex flex-col sm:flex-row shadow-lg rounded-lg bg-white mx-auto px-16 py-16 mt-16">
+      <div className="max-w-sm sm:max-w-5xl w-full flex flex-col sm:flex-row shadow-lg rounded-lg bg-white mx-auto px-16 py-16 mt-16">
         <div className="w-full sm:w-2/3 flex flex-col">
           <div className="my-4 text-gray-600 text-2xl">
             Cart
@@ -195,6 +256,7 @@ const Page: NextPage<Props> = ({ id }) => {
               </div>
               <div className="flex flex-1 my-auto mx-2">
                 <input className="w-8 h-6 border-gray-400 border-2 mx-auto rounded" type="number" min="0"
+                       disabled={!!invoice}
                        value={totalBurgers}
                        onChange={(event) => setTotalBurgers(event.target.value ? parseInt(event.target.value) : 0)}/>
               </div>
@@ -212,6 +274,7 @@ const Page: NextPage<Props> = ({ id }) => {
               </div>
               <div className="flex flex-1 my-auto mx-2">
                 <input className="w-8 h-6 border-gray-400 border-2 mx-auto rounded" type="number" min="0"
+                       disabled={!!invoice}
                        value={totalFries}
                        onChange={(event) => setTotalFries(event.target.value ? parseInt(event.target.value) : 0)}/>
               </div>
@@ -229,6 +292,7 @@ const Page: NextPage<Props> = ({ id }) => {
               </div>
               <div className="flex flex-1 my-auto mx-2">
                 <input className="w-8 h-6 border-gray-400 border-2 mx-auto rounded" type="number" min="0"
+                       disabled={!!invoice}
                        value={totalMilkshakes}
                        onChange={(event) => setTotalMilkshakes(event.target.value ? parseInt(event.target.value) : 0)}/>
               </div>
@@ -251,59 +315,12 @@ const Page: NextPage<Props> = ({ id }) => {
         </div>
         <div className="w-full sm:w-1/3 sm:ml-4">
 
-          <div className={'bg-gray-100 h-full shadow rounded-lg flex flex-col px-6 py-12' + (paymentPointerRequired? ' hidden': '')}>
-            <div className="text-gray-800 font-bold text-2xl">
-              Checkout
-            </div>
-            <div className="flex-1 flex flex-col justify-center">
-              <div className="text-gray-700 my-4">
-                ILP Eats is powered by ILP.
-                Go to https://rafiki.money to get an ILP enabled account Today!
-              </div>
-            </div>
-            <div className="w-full">
-              <button
-                onClick={checkout}
-                className="w-full h-10 shadow bg-teal-500 hover:bg-teal-400 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded"
-                type="button">
-                {paymentComplete ? 'Paid' : 'Checkout'}
-              </button>
-            </div>
-          </div>
-
-          <div className={'bg-gray-100 h-full shadow rounded-lg flex flex-col px-6 py-12' + (!paymentPointerRequired? ' hidden': '')}>
-            <div className="text-gray-800 font-bold text-2xl">
-              Payments Details
-            </div>
-            <div className="flex-1 flex flex-col justify-center">
-              <div className="text-gray-700 my-4">
-                Payment Handler is not available
-                Submit your payment pointer to checkout
-              </div>
-              <div className="flex items-center border-b border-b-2 border-teal-600 py-2 mt-4">
-                <input
-                  value={paymentPointer}
-                  onChange={(event) => {
-                    setPaymentPointer(event.target.value);
-                    setPaymentPointerError('')
-                  }}
-                  className="appearance-none bg-transparent border-none w-full text-gray-600 mr-3 py-1 px-2 leading-tight focus:outline-none"
-                  type="text" placeholder="$paymentpointer.org/alice"/>
-              </div>
-              <div className="mt-2 text-xs text-red-700 h-12">
-                {paymentPointerError ? paymentPointerError : null}
-              </div>
-            </div>
-            <div className="w-full">
-              <button
-                onClick={ppCheckout}
-                className="w-full h-10 shadow bg-teal-500 hover:bg-teal-400 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded"
-                type="button">
-                {isSubmitting ? '...' : 'Pay'}
-              </button>
-            </div>
-          </div>
-
+          { !paymentComplete ?
+            invoice ?
+              <DisplayInvoiceDetails invoice={invoice} setPaymentComplete={setPaymentComplete}/> :
+              <DisplayCheckout checkout={checkout}/> :
+              <DisplayPaymentComplete reset={reset}/>
+          }
         </div>
       </div>
     </div>

@@ -13,7 +13,11 @@ class MyDocument extends Document {
   render() {
     return (
       <Html className="w-full h-full">
-        <Head />
+        <Head>
+          <title>ILP Eats</title>
+          <link rel="stylesheet"
+                href="https://fonts.googleapis.com/css?family=Rubik"/>
+        </Head>
       <body className="w-full h-full bg-gray-200">
         <Main />
       <NextScript />
