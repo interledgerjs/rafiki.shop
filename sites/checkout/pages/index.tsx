@@ -9,7 +9,7 @@ import QRCode from 'qrcode.react'
 import {CopyToClipboard} from 'react-copy-to-clipboard';
 import { CheckmarkOutline } from '../components/icons/checkmark-outline'
 
-const methodName = process.env.METHOD_NAME || 'http://localhost:3000/'
+const methodName = process.env.METHOD_NAME || 'https://rafiki.money'
 
 const { publicRuntimeConfig } = getConfig()
 
@@ -61,18 +61,7 @@ const DisplayCheckout: FC<{checkout: () => void}> = ({checkout}) => {
   )
 }
 
-const DisplayInvoiceDetails: FC<any> = ({invoice, setPaymentComplete}) => {
-
-  const invoiceUrl = "https:" + invoice.name
-
-  useInterval(() => {
-    axios.get(invoiceUrl).then((response) => {
-     const inv = response.data
-      if(inv.amount === inv.received) {
-        setPaymentComplete(true)
-      }
-    })
-  }, 500)
+const DisplayInvoiceDetails: FC<any> = ({invoice}) => {
 
   return (
     <div className='bg-gray-100 h-full shadow rounded-lg flex flex-col px-6 py-12'>
@@ -126,8 +115,6 @@ const Page: NextPage<Props> = ({ id }) => {
   const [totalFries, setTotalFries] = useState(1)
   const [totalMilkshakes, setTotalMilkshakes] = useState(1)
 
-
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [invoice, setInvoice] = useState<any>()
   const [paymentComplete, setPaymentComplete] = useState(false)
 
@@ -136,13 +123,25 @@ const Page: NextPage<Props> = ({ id }) => {
     setPaymentComplete(false)
   }
 
+  useInterval(() => {
+    if(invoice && !paymentComplete) {
+      const invoiceUrl = "https:" + invoice.name
+      axios.get(invoiceUrl).then((response) => {
+        const inv = response.data
+        if(inv.amount === inv.received) {
+          setPaymentComplete(true)
+        }
+      })
+    }
+  }, 500)
+
+
   const total = useMemo(
     () => {
       return totalBurgers * 499 + totalFries * 299 + totalMilkshakes * 499
     },
     [totalBurgers, totalFries, totalMilkshakes]
   )
-
 
   const checkCanMakePayment = async (request) => {
     if (!request.canMakePayment) {
@@ -178,7 +177,6 @@ const Page: NextPage<Props> = ({ id }) => {
     try {
       const instrumentResponse = await request.show()
       await instrumentResponse.complete('success')
-      setPaymentComplete(true)
       console.info('This is a demo website. No payment will be processed.', instrumentResponse)
     } catch (e) {
       console.error(e.toString())
@@ -193,47 +191,52 @@ const Page: NextPage<Props> = ({ id }) => {
       assetScale: 6,
       amount: total*10000,
       description: "ILP Eats Order"
-    }).then(response => response.data)
+    }).then(response => {
+      setInvoice(response.data)
+      return response.data
+    })
 
     // If Payment Handler Show it
-    {/*if (window.PaymentRequest) {*/}
-    //     const paymentMethodData: PaymentMethodData[] = [
-    //       {
-    //         supportedMethods: methodName,
-    {/*        data: {*/}
-    {/*          invoice*/}
-    {/*        }*/}
-    {/*      }*/}
-    {/*    ]*/}
+    let paymentHandlerPayment: boolean = false
+    if (window.PaymentRequest) {
+        const paymentMethodData: PaymentMethodData[] = [
+          {
+            supportedMethods: 'https://openpayments.dev/pay',
+            data: {
+              invoice
+            }
+          }
+        ]
 
-    //     const paymentDetailsInit: PaymentDetailsInit = {
-    //       total: {
-    //         label: 'ILP Eats',
-    {/*        amount: {*/}
-    //           value: (total/100).toFixed(2).toString(),
-    //           currency: 'USD'
-    //         }
-    //       }
-    //     }
-    //     let request
-    //
-    //     try {
-    //       request = new PaymentRequest(paymentMethodData, paymentDetailsInit)
-    //     } catch (e) {
-    //       console.error(e.toString())
-    //       setPaymentPointerRequired(true)
-    //       return null
-    //     }
-    //
-    //     await checkCanMakePayment(request)
-    //     await checkHasEnrolledInstrument(request)
-    //
-    //     await initiatePaymentRequest(request)
-    // }
+        const paymentDetailsInit: PaymentDetailsInit = {
+          total: {
+              label: 'ILP Eats',
+              amount: {
+                value: (total / 100).toFixed(2).toString(),
+                currency: 'USD'
+          }
+            }
+          }
+        let request
+
+        try {
+          request = new PaymentRequest(paymentMethodData, paymentDetailsInit)
+          // await checkHasEnrolledInstrument(request)
+
+          await checkCanMakePayment(request)
+          //
+          await initiatePaymentRequest(request)
+        } catch (e) {
+          console.error(e.toString())
+        }
+    }
 
     // Else display invoice details
-    setInvoice(invoice)
+    if(!paymentHandlerPayment) {
 
+    } else {
+      setInvoice(invoice)
+    }
   }
 
   return (
