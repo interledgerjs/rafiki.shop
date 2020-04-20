@@ -176,7 +176,11 @@ const Page: NextPage<Props> = ({ id }) => {
   
     try {
       const instrumentResponse = await request.show()
-      await instrumentResponse.complete('success')
+      console.log(instrumentResponse)
+      if (instrumentResponse.details.success) {
+        await instrumentResponse.complete('success')
+        setPaymentComplete(true)
+      }
       console.info('This is a demo website. No payment will be processed.', instrumentResponse)
     } catch (e) {
       console.error(e.toString())
