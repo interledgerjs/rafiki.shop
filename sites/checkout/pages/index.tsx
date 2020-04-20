@@ -43,19 +43,19 @@ export function useInterval(callback, delay) {
 
 const DisplayCheckout: FC<{checkout: () => void}> = ({checkout}) => {
   return (
-    <div className='bg-gray-100 h-full shadow rounded-lg flex flex-col px-6 py-12'>
-      <div className="text-gray-800 font-bold text-2xl">
+    <div className='h-full flex flex-col px-6 py-6 sm:py-12'>
+      <div className="hidden sm:flex text-gray-800 font-bold text-2xl">
         Checkout
       </div>
-      <div className="flex-1 flex flex-col justify-center">
-        <div className="text-gray-700 my-4">
-          ILP Eats is powered by Open Payments. Go to <a href="https://rafiki.money" target='_blank'>https://rafiki.money</a> to get an Open Payments enabled account Today!
-        </div>
-      </div>
-      <div className="w-full">
+      <div className="w-1/2 self-center hidden sm:flex my-6">
         <OpenPaymentsButton
           onClick={checkout}
         />
+      </div>
+      <div className="flex-1 flex flex-col justify-center">
+        <div className="text-gray-700">
+          ILP Eats is powered by Open Payments. Go to <a className="text-gray-500" href="https://rafiki.money" target='_blank'>rafiki.money</a> to get an Open Payments enabled account Today!
+        </div>
       </div>
     </div>
   )
@@ -64,7 +64,7 @@ const DisplayCheckout: FC<{checkout: () => void}> = ({checkout}) => {
 const DisplayInvoiceDetails: FC<any> = ({invoice}) => {
 
   return (
-    <div className='bg-gray-100 h-full shadow rounded-lg flex flex-col px-6 py-12'>
+    <div className='h-fullflex flex-col px-6 py-6 sm:py-12'>
       <div className="text-gray-800 font-bold text-2xl text-center">
         Payments Details
       </div>
@@ -81,8 +81,8 @@ const DisplayInvoiceDetails: FC<any> = ({invoice}) => {
         />
       </div>
       <CopyToClipboard text={invoice.name}>
-        <div className="bg-white focus:outline-none focus:shadow-outline border border-gray-300 rounded-lg py-2 px-4 block w-full appearance-none leading-normal">
-            {invoice.name}
+        <div className="bg-white focus:outline-none focus:shadow-outline border border-gray-300 rounded-lg py-2 px-4 block w-full cursor-pointer appearance-none leading-normal">
+          Click here to copy Invoice details to your clipboard
         </div>
       </CopyToClipboard>
     </div>
@@ -91,15 +91,15 @@ const DisplayInvoiceDetails: FC<any> = ({invoice}) => {
 
 const DisplayPaymentComplete: FC<any> = ({reset}) => {
   return (
-    <div className='bg-gray-100 h-full shadow rounded-lg flex flex-col px-6 py-12'>
-      <div className="text-gray-800 font-bold text-2xl">
+    <div className='h-full flex flex-col px-6 py-6 sm:py-12'>
+      <div className="text-gray-800 text-center sm:text-left font-bold text-2xl">
         Payment Complete
       </div>
       <div className="flex-1 flex flex-col justify-center">
-        <CheckmarkOutline className="h-32"/>
+        <CheckmarkOutline className="h-16 sm:h-32"/>
       </div>
       <div onClick={reset} className="flex justify-center mt-4">
-        <div className="ml-4 rounded-lg px-4 md:px-5 xl:px-4 py-3 md:py-4 xl:py-3 bg-white hover:bg-gray-200 md:text-lg xl:text-base text-gray-800 font-semibold leading-tight shadow-md">
+        <div className="ml-4 rounded-lg px-4 md:px-5 xl:px-4 py-3 md:py-4 xl:py-3 bg-white hover:bg-gray-200 md:text-lg xl:text-base text-gray-800 font-semibold leading-tight shadow">
           Restart
         </div>
       </div>
@@ -224,7 +224,6 @@ const Page: NextPage<Props> = ({ id }) => {
           // await checkHasEnrolledInstrument(request)
 
           await checkCanMakePayment(request)
-          //
           await initiatePaymentRequest(request)
         } catch (e) {
           console.error(e.toString())
@@ -241,12 +240,12 @@ const Page: NextPage<Props> = ({ id }) => {
 
   return (
     <div className="flex flex-1 flex-col">
-      <div className="max-w-5xl mx-auto mt-8 text-4xl text-gray-800">
+      <div className="max-w-5xl mx-auto my-4 sm:mt-8 sm:mb-0 text-4xl text-gray-800">
         ILP EATS
       </div>
-      <div className="max-w-sm sm:max-w-5xl w-full flex flex-col sm:flex-row shadow-lg rounded-lg bg-white mx-auto px-16 py-16 mt-16">
+      <div className="max-w-xs sm:max-w-5xl w-full flex flex-col sm:flex-row shadow-lg rounded-lg bg-white mx-auto px-4 py-4 mb-4 sm:px-16 sm:py-16 sm:mt-16 sm:mb-0">
         <div className="w-full sm:w-2/3 flex flex-col">
-          <div className="my-4 text-gray-600 text-2xl">
+          <div className="sm:my-4 text-gray-600 text-2xl">
             Cart
           </div>
           <div className="flex-1">
@@ -305,12 +304,21 @@ const Page: NextPage<Props> = ({ id }) => {
             </div>
             <div className="border-b border-gray-500"/>
           </div>
-          <div className="my-4 justify-end flex mr-16">
-            <div>
-              <div className="text-gray-600 text-3xl">
+          <div className="my-4 flex justify-end flex-row flex-wrap">
+            <div className="w-1/2 mt-1 sm:hidden flex">
+              {!paymentComplete ?
+            invoice ? null:
+                <OpenPaymentsButton
+                onClick={checkout}
+              />
+              : null
+            }
+            </div>
+            <div className="w-1/2">
+              <div className="text-right text-gray-600 text-2xl">
                 $ {toVisibileValue(total)}
               </div>
-              <div className="text-gray-500 text-center">
+              <div className="text-gray-500 text-xs text-right">
                 Subtotal
               </div>
             </div>
