@@ -64,15 +64,15 @@ export const OpenPaymentsButton: React.FC<Props>=  ({className, onClick, loading
   }, [loading])
 
   return (
-    <div onClick={onClick} className="flex my-auto w-full content-center items-center justify-center px-4 h-12 bg-white rounded shadow cursor-pointer hover:bg-gray-100">
+    <div onClick={onClick} className="flex my-auto w-full content-center items-center justify-center px-4 h-inputBox bg-dark shadow cursor-pointer hover:bg-gray-100">
       {
         isLoading
           ?
-          <div className="flex my-auto font-bold" style={{color: '#1e3250', fontFamily: 'Rubik,sans-serif'}}>Processing...</div>
+          <div className="flex my-auto font-bold" >Processing...</div>
           :
           <div className="my-auto flex items-center">
-            <OpenPaymentsLogo size={8}/>
-            <div className="flex my-auto ml-2 text-3xl" style={{color: '#3c4043', fontFamily: 'Rubik,sans-serif'}}>Pay</div>
+            <OpenPaymentsLogo size={6}/>
+            <div className="flex my-auto text-white ml-2 text-xl">Pay</div>
           </div>
       }
     </div>

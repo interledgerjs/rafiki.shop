@@ -1,3 +1,74 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css?family=Rubik&display=swap');
+
+html {
+  @apply font-body
+}
+
+.inputText {
+  @apply absolute;
+  height: 24px;
+  left: 16px;
+  top: 16px;
+  @apply text-xl;
+}
+
+.assistiveText {
+  position: absolute;
+  height: 16px;
+  left: 16px;
+  right: 200px;
+  top: 59px;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 12px;
+  line-height: 16px;
+
+  letter-spacing: 0.4px;
+}
+
+.inputLabel{
+  position: absolute;
+  height: 16px;
+  left: 16px;
+  top: -8px;
+
+  font-style: normal;
+  font-weight: normal;
+  font-size: 12px;
+  line-height: 16px;
+
+  letter-spacing: 0.4px;
+}
+
+@keyframes toLabel {
+  from {@apply inputText;}
+  to {@apply inputLabel;}
+}
+
+@keyframes toPlaceHolder {
+  from {@apply inputLabel;}
+  to {@apply inputText;}
+}
+
+.toLabel{
+  animation-name: toLabel;
+  animation-duration: 0.1s;
+}
+
+.toPlaceHolder{
+  animation-name: toPlaceHolder;
+  animation-duration: 0.1s;
+}
+
+.listline-img {
+  height: 56px;
+  width: 56px;
+  min-width: 56px;
+  border-radius: 4px;
+  margin-left: 8px;
+  margin-right: 16px;
+}

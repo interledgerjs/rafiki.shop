@@ -20,6 +20,7 @@
     "react": "16.11.0",
     "react-copy-to-clipboard": "^5.0.2",
     "react-dom": "16.11.0",
+    "react-hook-form": "^3.29.4",
     "react-spinners": "^0.6.1"
   },
   "devDependencies": {
