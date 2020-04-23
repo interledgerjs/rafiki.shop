@@ -8,6 +8,156 @@ html {
   @apply font-body
 }
 
+.vector0 {
+  left: calc(50% - 213px/2 - 117px);
+  top: calc(50% - 222.34px/2 - 258.33px);
+}
+.vector1 {
+  left: calc(50% - 265.23px/2 + 141.12px);
+  top: calc(50% - 228px/2 - 266.5px);
+
+}
+.vector2 {
+  left: calc(50% - 223px/2 - 23px);
+  top: calc(50% - 207px/2 - 11px);
+
+}
+.vector3 {
+  left: calc(50% - 234.63px/2 - 170.18px);
+  top: calc(50% - 236.58px/2 + 191.79px);
+
+}
+.vector4 {
+  left: calc(50% - 206px/2 + 200px);
+  top: calc(50% - 222.71px/2 + 100px);
+
+}
+.vector5 {
+  left: calc(50% - 249.76px/2 + 140.38px);
+  top: calc(50% - 212.65px/2 + 328.83px);
+}
+
+@screen sm {
+  .vector0 {
+    left: calc(50% - 213px/2 - 117px);
+    top: calc(50% - 222.34px/2 - 258.33px);
+  }
+  .vector1 {
+    left: calc(50% - 265.23px/2 + 141.12px);
+    top: calc(50% - 228px/2 - 266.5px);
+  
+  }
+  .vector2 {
+    left: calc(50% - 223px/2 - 23px);
+    top: calc(50% - 207px/2 - 11px);
+  
+  }
+  .vector3 {
+    left: calc(50% - 234.63px/2 - 170.18px);
+    top: calc(50% - 236.58px/2 + 191.79px);
+  
+  }
+  .vector4 {
+    left: calc(50% - 206px/2 + 200px);
+    top: calc(50% - 222.71px/2 + 100px);
+  
+  }
+  .vector5 {
+    left: calc(50% - 249.76px/2 + 140.38px);
+    top: calc(50% - 212.65px/2 + 328.83px);
+  }
+}
+@screen md {
+  .vector0 {
+    left: calc(50% - 213px/2 - 117px);
+    top: calc(50% - 222.34px/2 - 258.33px);
+  }
+  .vector1 {
+    left: calc(50% - 265.23px/2 + 141.12px);
+    top: calc(50% - 228px/2 - 266.5px);
+  
+  }
+  .vector2 {
+    left: calc(50% - 223px/2 - 23px);
+    top: calc(50% - 207px/2 - 11px);
+  
+  }
+  .vector3 {
+    left: calc(50% - 234.63px/2 - 170.18px);
+    top: calc(50% - 236.58px/2 + 191.79px);
+  
+  }
+  .vector4 {
+    left: calc(50% - 206px/2 + 200px);
+    top: calc(50% - 222.71px/2 + 100px);
+  
+  }
+  .vector5 {
+    left: calc(50% - 249.76px/2 + 140.38px);
+    top: calc(50% - 212.65px/2 + 328.83px);
+  }
+}
+@screen lg {
+  .vector0 {
+    left: calc(50% - 213px/2 - 117px);
+    top: calc(50% - 222.34px/2 - 258.33px);
+  }
+  .vector1 {
+    left: calc(50% - 265.23px/2 + 141.12px);
+    top: calc(50% - 228px/2 - 266.5px);
+  
+  }
+  .vector2 {
+    left: calc(50% - 223px/2 - 23px);
+    top: calc(50% - 207px/2 - 11px);
+  
+  }
+  .vector3 {
+    left: calc(50% - 234.63px/2 - 170.18px);
+    top: calc(50% - 236.58px/2 + 191.79px);
+  
+  }
+  .vector4 {
+    left: calc(50% - 206px/2 + 200px);
+    top: calc(50% - 222.71px/2 + 100px);
+  
+  }
+  .vector5 {
+    left: calc(50% - 249.76px/2 + 140.38px);
+    top: calc(50% - 212.65px/2 + 328.83px);
+  }
+}
+@screen xl {
+  .vector0 {
+    left: calc(50% - 213px/2 - 117px);
+    top: calc(50% - 222.34px/2 - 258.33px);
+  }
+  .vector1 {
+    left: calc(50% - 265.23px/2 + 141.12px);
+    top: calc(50% - 228px/2 - 266.5px);
+  
+  }
+  .vector2 {
+    left: calc(50% - 223px/2 - 23px);
+    top: calc(50% - 207px/2 - 11px);
+  
+  }
+  .vector3 {
+    left: calc(50% - 234.63px/2 - 170.18px);
+    top: calc(50% - 236.58px/2 + 191.79px);
+  
+  }
+  .vector4 {
+    left: calc(50% - 206px/2 + 200px);
+    top: calc(50% - 222.71px/2 + 100px);
+  
+  }
+  .vector5 {
+    left: calc(50% - 249.76px/2 + 140.38px);
+    top: calc(50% - 212.65px/2 + 328.83px);
+  }
+}
+
 .inputText {
   @apply absolute;
   height: 24px;
@@ -28,40 +178,6 @@ html {
   line-height: 16px;
 
   letter-spacing: 0.4px;
-}
-
-.inputLabel{
-  position: absolute;
-  height: 16px;
-  left: 16px;
-  top: -8px;
-
-  font-style: normal;
-  font-weight: normal;
-  font-size: 12px;
-  line-height: 16px;
-
-  letter-spacing: 0.4px;
-}
-
-@keyframes toLabel {
-  from {@apply inputText;}
-  to {@apply inputLabel;}
-}
-
-@keyframes toPlaceHolder {
-  from {@apply inputLabel;}
-  to {@apply inputText;}
-}
-
-.toLabel{
-  animation-name: toLabel;
-  animation-duration: 0.1s;
-}
-
-.toPlaceHolder{
-  animation-name: toPlaceHolder;
-  animation-duration: 0.1s;
 }
 
 .listline-img {

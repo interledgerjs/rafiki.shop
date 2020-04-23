@@ -1,5 +1,11 @@
 module.exports = {
   theme: {
+    screens: {
+      sm: '600px',
+      md: '1024px',
+      lg: '1440px',
+      xl: '1920px',
+    },
     fontFamily: {
       display: 'Rubik, sans-serif',
       body: 'Rubik, sans-serif'

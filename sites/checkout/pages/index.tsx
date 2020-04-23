@@ -87,9 +87,8 @@ const Checkout: NextPage<Props> = ({ id }) => {
                 inputRef={(register({required: true}))}
                 name='username'
                 label='Email'
-                bgColour='secondary'
                 hint={'Email is required to receive your coffee'}
-                />
+              />
             </div>
                 <OpenPaymentsButton/>
           </form>

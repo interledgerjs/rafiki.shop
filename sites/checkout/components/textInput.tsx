@@ -9,7 +9,6 @@ type props = {
   style?: any
   textColour?: string
   blurColour?: string
-  bgColour?: string
   disabled?: boolean
   hint?: string
   label?: string
@@ -23,7 +22,6 @@ const TextInput: React.FC<props> = (props) => {
   const textColour = props.textColour? props.textColour : 'dark'
   let blurColour = props.blurColour? props.blurColour : 'dark'
   let focusColour = 'dark'
-  const bgColour = props.bgColour? props.bgColour : 'secondary'
   const maxWidth = props.maxWidth? props.maxWidth : 'xs'
   const inputType = props.inputType? props.inputType: 'text'
   if (props.errorState) {
@@ -35,15 +33,15 @@ const TextInput: React.FC<props> = (props) => {
   const [focussed, setFocussed] = React.useState(false)
 
   return (
-    <div style={props.style} className={`bg-${bgColour} max-w-${maxWidth} ${props.className} relative h-18 mb-5`}>
+    <div style={props.style} className={`bg-transparent max-w-${maxWidth} ${props.className} relative h-18 mb-5`}>
 
       <div 
         className={`left-0 right-0 top-0 h-inputBox border${focussed||props.errorState? '-2': ''} border-${focussed||props.errorState? focusColour: textColour + ' opacity-12'}`}>
       </div>
 
       <label 
-        className={props.label? `${focussed? (value==''?'toLabel inputLabel':'inputLabel'): (value==''?'toPlaceHolder inputText':'inputLabel')} text-${focussed? focusColour: blurColour} border-l-2 border-r-2 border-transparent bg-${bgColour}`: `invisible `}>
-        {props.label? props.label: ''}
+        className={props.label ? `${value === '' ? 'inputText' : 'hidden'} text-${focussed? focusColour: blurColour} border-l-2 border-r-2 border-transparent`: `invisible `}>
+        {props.label || 'Label'}
       </label>
 
       <input 
