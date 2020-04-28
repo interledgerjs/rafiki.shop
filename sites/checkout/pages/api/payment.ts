@@ -9,13 +9,14 @@ const PAYMENT_POINTER = 'https://rafiki.money/p/ilpeats'
 const ILP_URL = (agreementId: string) => `https://rafiki.money/ilp/agreements/${agreementId}/ilp`
 const OAUTH_CLIENT_ID = publicRuntimeConfig.OAUTH_CLIENT_ID
 const OAUTH_CALLBACK_URL = publicRuntimeConfig.OAUTH_CALLBACK_URL
+const OAUTH_DISCOVERY_URL = publicRuntimeConfig.OAUTH_DISCOVERY_URL
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   const { body } = req
 
   try {
 
-    const issuer = await Issuer.discover('https://auth.rafiki.money') // => Promise
+    const issuer = await Issuer.discover(OAUTH_DISCOVERY_URL) // => Promise
       .then((rafikiIssuer) => {
         return rafikiIssuer
       });
