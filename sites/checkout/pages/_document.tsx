@@ -14,14 +14,15 @@ class MyDocument extends Document {
     return (
       <Html className="w-full h-full">
         <Head>
-          <title>ILP Eats</title>
+          <title>ILP Checkout</title>
           <link rel="stylesheet"
                 href="https://fonts.googleapis.com/css?family=Rubik"/>
+                <meta name="mobile-web-app-capable" content="yes"></meta>
         </Head>
-      <body className="w-full h-full bg-gray-200">
-        <Main />
-      <NextScript />
-      </body>
+        <body className="w-full h-full bg-secondary">
+          <Main/>
+          <NextScript/>
+        </body>
       </Html>
     )
   }
