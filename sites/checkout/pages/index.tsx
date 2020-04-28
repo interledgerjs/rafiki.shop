@@ -1,17 +1,15 @@
-import React, { useState, useMemo, FC, useRef, useEffect } from 'react'
+import React, { useState, FC, useRef, useEffect } from 'react'
 import axios from 'axios'
 import { NextPage } from "next"
 import nanoid from 'nanoid'
-import { Base64 } from 'js-base64'
 import useForm from 'react-hook-form'
 import getConfig from 'next/config'
 import { OpenPaymentsButton } from '../components/open-payments-button'
 import QRCode from 'qrcode.react'
 import {CopyToClipboard} from 'react-copy-to-clipboard';
-import { CheckmarkOutline } from '../components/icons/checkmark-outline'
 import { Decor, CartItem, TextInput, Coffee } from '../components'
 
-const methodName = process.env.METHOD_NAME || 'https://db13d51f.ngrok.io/pay'
+const methodName = process.env.METHOD_NAME || 'https://openpayments.dev/pay'
 
 const { publicRuntimeConfig } = getConfig()
 
