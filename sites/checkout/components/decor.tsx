@@ -3,22 +3,22 @@ import * as React from 'react'
 const Decor: React.FC = () => {
   return (
     <div className="overflow-x-hidden">
-      <div className="absolute -z-10 vector0">
+      <div className="absolute -z-10 opacity-75 vector0 sm:transform sm:origin-top-left sm:scale-150 md:scale-200 lg:scale-250 xl:scale-300">
         <Vector/>
       </div>
-      <div className="absolute -z-10 vector1">
+      <div className="absolute -z-10 opacity-75 vector1 sm:transform sm:origin-top-left sm:scale-150 md:scale-200 lg:scale-250 xl:scale-300">
         <Vector1/>
       </div>
-      <div className="absolute -z-10 vector2">
+      <div className="absolute -z-10 opacity-75 vector2 sm:transform sm:origin-top-left sm:scale-150 md:scale-200 lg:scale-250 xl:scale-300">
         <Vector2/>
       </div>
-      <div className="absolute -z-10 vector3">
+      <div className="absolute -z-10 opacity-75 vector3 sm:transform sm:origin-top-left sm:scale-150 md:scale-200 lg:scale-250 xl:scale-300">
         <Vector3/>
       </div>
-      <div className="absolute -z-10 vector4">
+      <div className="absolute -z-10 opacity-75 vector4 sm:transform sm:origin-top-left sm:scale-150 md:scale-200 lg:scale-250 xl:scale-300">
         <Vector4/>
       </div>
-      <div className="absolute -z-10 vector5">
+      <div className="absolute -z-10 opacity-75 vector5 sm:transform sm:origin-top-left sm:scale-150 md:scale-200 lg:scale-250 xl:scale-300">
         <Vector5/>
       </div>
     </div>
@@ -62,7 +62,7 @@ const Vector3 = () => {
 const Vector4 = () => {
   return (
     <svg width="206" height="223" viewBox="0 0 206 223" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path fillRule="evenodd" clipRule="evenodd" d="M95.0272 218.47C73.504 213.312 59.1077 195.243 42.3228 180.817C27.1748 167.798 8.26091 157.469 1.98865 138.506C-4.29732 119.5 6.05723 100.14 9.09483 80.3545C12.9147 55.4729 2.59634 23.8074 22.0502 7.83139C41.3276 -7.99974 70.729 4.14178 95.0272 9.78456C114.508 14.3087 131.661 23.9197 146.933 36.833C161.187 48.8856 170.195 64.5691 179.174 80.9348C190.475 101.535 207.544 120.859 205.888 144.296C204.054 170.242 191.571 196.938 169.953 211.402C148.58 225.702 120.035 224.463 95.0272 218.47Z" fill="#F19950"/>
+      <path fillRule="evenodd" clipRule="evenodd" d="M95.0272 218.47C73.504 213.312 59.1077 195.243 42.3228 180.817C27.1748 167.798 8.26091 157.469 1.98865 138.506C-4.29732 119.5 6.05722 100.14 9.09483 80.3545C12.9147 55.4729 2.59634 23.8074 22.0502 7.83136C41.3276 -7.99977 70.729 4.14175 95.0272 9.78453C114.508 14.3087 131.661 23.9197 146.933 36.833C161.187 48.8856 170.195 64.5691 179.174 80.9348C190.475 101.535 207.544 120.859 205.888 144.296C204.054 170.242 191.571 196.938 169.953 211.402C148.58 225.702 120.035 224.463 95.0272 218.47Z" fill="#F19950"/>
     </svg>
   )
 }

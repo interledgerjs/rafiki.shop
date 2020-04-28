@@ -22,7 +22,7 @@ const TextInput: React.FC<props> = (props) => {
   const textColour = props.textColour? props.textColour : 'dark'
   let blurColour = props.blurColour? props.blurColour : 'dark'
   let focusColour = 'dark'
-  const maxWidth = props.maxWidth? props.maxWidth : 'xs'
+  const maxWidth = props.maxWidth? props.maxWidth : 'sm'
   const inputType = props.inputType? props.inputType: 'text'
   if (props.errorState) {
     blurColour = 'error'
@@ -33,10 +33,10 @@ const TextInput: React.FC<props> = (props) => {
   const [focussed, setFocussed] = React.useState(false)
 
   return (
-    <div style={props.style} className={`bg-transparent max-w-${maxWidth} ${props.className} relative h-18 mb-5`}>
+    <div style={props.style} className={`bg-transparent max-w-${maxWidth} ${props.className} mx-auto relative h-18 mb-5`}>
 
       <div 
-        className={`left-0 right-0 top-0 h-inputBox border${focussed||props.errorState? '-2': ''} border-${focussed||props.errorState? focusColour: textColour + ' opacity-12'}`}>
+        className={`left-0 right-0 top-0 bg-secondary h-inputBox border${focussed||props.errorState? '-2': ''} border-${focussed||props.errorState? focusColour: textColour}`}>
       </div>
 
       <label 
@@ -45,7 +45,7 @@ const TextInput: React.FC<props> = (props) => {
       </label>
 
       <input 
-        onFocus={() => {setFocussed(true)}} onBlur={() => {setFocussed(false)}} ref={props.inputRef? props.inputRef: undefined} name={props.name} type={inputType} className={`inputText focus:outline-none bg-transparent text-${textColour} max-w-${maxWidth} w-5/6 focus:`} onKeyPress={props.onKeyPress? e => props.onKeyPress(e) : () => {}} onChange={e => {setValue(e.target.value);if (props.validationFunction) props.validationFunction(e)}}>
+        onFocus={() => {setFocussed(true)}} onBlur={() => {setFocussed(false)}} ref={props.inputRef? props.inputRef: undefined} name={props.name} type={inputType} className={`inputText focus:outline-none bg-transparent text-${textColour} max-w-${maxWidth} w-11/12 focus:`} onKeyPress={props.onKeyPress? e => props.onKeyPress(e) : () => {}} onChange={e => {setValue(e.target.value);if (props.validationFunction) props.validationFunction(e)}}>
       </input>
 
       <p 

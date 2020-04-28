@@ -3238,6 +3238,11 @@ hash.js@^1.0.0, hash.js@^1.0.3:
     inherits "^2.0.3"
     minimalistic-assert "^1.0.1"
 
+hex-rgb@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/hex-rgb/-/hex-rgb-4.1.0.tgz#2d5d3a2943bd40e7dc9b0d5b98903d7d17035967"
+  integrity sha512-n7xsIfyBkFChITGPh6FLtxNzAt2HxZLcQIY9hYH4gm2gmMQJHMguMH3E+jnmvUbSTF5QrmFnGab5Ippi+D7e/g==
+
 hmac-drbg@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/hmac-drbg/-/hmac-drbg-1.0.1.tgz#d2745701025a6c775a6c545793ed502fc0c649a1"
@@ -5570,6 +5575,13 @@ supports-color@^7.1.0:
   integrity sha512-oRSIpR8pxT1Wr2FquTNnGet79b3BWljqOuoW/h4oBhxJ/HUbX5nX6JSruTkvXDCFMwDPvsaTTbvMLKZWSy0R5g==
   dependencies:
     has-flag "^4.0.0"
+
+tailwindcss-elevation@^0.3.3:
+  version "0.3.4"
+  resolved "https://registry.yarnpkg.com/tailwindcss-elevation/-/tailwindcss-elevation-0.3.4.tgz#686fb50451a68c0f9c2dcbe70ffcb3895addcba8"
+  integrity sha512-xGlQN7ZLF9QEvQsom0/RH7SUm8F6gsDmwgzyKtlQKpj8Ymr0IwjcAMJy0LsPdY9fjAgkaLsa7sLv5pinjX9Y1Q==
+  dependencies:
+    hex-rgb "^4.1.0"
 
 tailwindcss@^1.3.4:
   version "1.3.4"

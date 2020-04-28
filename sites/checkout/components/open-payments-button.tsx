@@ -64,7 +64,7 @@ export const OpenPaymentsButton: React.FC<Props>=  ({className, onClick, loading
   }, [loading])
 
   return (
-    <div onClick={onClick} className="flex my-auto w-full content-center items-center justify-center px-4 h-inputBox bg-dark shadow cursor-pointer hover:bg-gray-100">
+    <button onClick={onClick} type="submit" className="flex my-auto w-full content-center items-center mx-auto justify-center px-4 h-inputBox bg-black elevation-6 cursor-pointer max-w-sm sm:w-card">
       {
         isLoading
           ?
@@ -75,6 +75,6 @@ export const OpenPaymentsButton: React.FC<Props>=  ({className, onClick, loading
             <div className="flex my-auto text-white ml-2 text-xl">Pay</div>
           </div>
       }
-    </div>
+    </button>
   )
 }

@@ -13,9 +13,8 @@ html {
   top: calc(50% - 222.34px/2 - 258.33px);
 }
 .vector1 {
-  left: calc(50% - 265.23px/2 + 141.12px);
-  top: calc(50% - 228px/2 - 266.5px);
-
+  left: calc(50% - 265.23px/2 + 162.12px);
+  top: calc(50% - 228px/2 - 224.5px);
 }
 .vector2 {
   left: calc(50% - 223px/2 - 23px);
@@ -39,122 +38,109 @@ html {
 
 @screen sm {
   .vector0 {
-    left: calc(50% - 213px/2 - 117px);
-    top: calc(50% - 222.34px/2 - 258.33px);
+    left: calc(50% - 266.25px/2 - 300px);
+    top: calc(50% - 277.93px/2 - 350px);
   }
   .vector1 {
-    left: calc(50% - 265.23px/2 + 141.12px);
-    top: calc(50% - 228px/2 - 266.5px);
-  
+    left: calc(50% - 331.54px/2 + 195.77px);
+    top: calc(50% - 285px/2 - 390px);
   }
   .vector2 {
-    left: calc(50% - 223px/2 - 23px);
-    top: calc(50% - 207px/2 - 11px);
-  
+    left: calc(50% - 278.75px/2 - 100.62px);
+    top: calc(50% - 258.75px/2 - 20.88px);
   }
   .vector3 {
-    left: calc(50% - 234.63px/2 - 170.18px);
-    top: calc(50% - 236.58px/2 + 191.79px);
+    left: calc(50% - 293.29px/2 - 220px);
+    top: calc(50% - 295.73px/2 + 300px);
   
   }
   .vector4 {
-    left: calc(50% - 206px/2 + 200px);
-    top: calc(50% - 222.71px/2 + 100px);
+    left: calc(50% - 257.5px/2 + 280px);
+    top: calc(50% - 278.38px/2);
   
   }
   .vector5 {
-    left: calc(50% - 249.76px/2 + 140.38px);
-    top: calc(50% - 212.65px/2 + 328.83px);
+    left: calc(50% - 312.2px/2 + 168.1px);
+    top: calc(50% - 265.82px/2 + 350px);
   }
 }
 @screen md {
   .vector0 {
-    left: calc(50% - 213px/2 - 117px);
-    top: calc(50% - 222.34px/2 - 258.33px);
+    left: calc(50% - 426px/2 - 379px);
+    top: calc(50% - 444.68px/2 - 343.66px);
   }
   .vector1 {
-    left: calc(50% - 265.23px/2 + 141.12px);
-    top: calc(50% - 228px/2 - 266.5px);
-  
+    left: calc(50% - 530.46px/2 + 159.23px);
+    top: calc(50% - 455.99px/2 - 400px);
   }
   .vector2 {
-    left: calc(50% - 223px/2 - 23px);
-    top: calc(50% - 207px/2 - 11px);
-  
+    left: calc(50% - 446px/2 + 569px);
+    top: calc(50% - 414px/2 - 103px);    
   }
   .vector3 {
-    left: calc(50% - 234.63px/2 - 170.18px);
-    top: calc(50% - 236.58px/2 + 191.79px);
-  
+    left: calc(50% - 469.26px/2 - 487.37px);
+    top: calc(50% - 473.16px/2 + 129.58px);
   }
   .vector4 {
-    left: calc(50% - 206px/2 + 200px);
-    top: calc(50% - 222.71px/2 + 100px);
-  
+    left: calc(50% - 257.5px/2 + 300px);
+    top: calc(50% - 278.38px/2 + 227.7px);    
   }
   .vector5 {
-    left: calc(50% - 249.76px/2 + 140.38px);
-    top: calc(50% - 212.65px/2 + 328.83px);
+    left: calc(50% - 499.52px/2 - 95.24px);
+    top: calc(50% - 425.31px/2 + 387.65px);
   }
 }
 @screen lg {
   .vector0 {
-    left: calc(50% - 213px/2 - 117px);
-    top: calc(50% - 222.34px/2 - 258.33px);
+    left: calc(50% - 532.5px/2 - 548.75px);
+    top: calc(50% - 555.86px/2 - 393.07px);
   }
   .vector1 {
-    left: calc(50% - 265.23px/2 + 141.12px);
-    top: calc(50% - 228px/2 - 266.5px);
-  
+    left: calc(50% - 663.08px/2 + 127.54px);
+    top: calc(50% - 553.99px/2 - 444px);
   }
   .vector2 {
-    left: calc(50% - 223px/2 - 23px);
-    top: calc(50% - 207px/2 - 11px);
-  
+    left: calc(50% - 557.5px/2 + 707.75px);
+    top: calc(50% - 517.5px/2 - 65.25px);
   }
   .vector3 {
-    left: calc(50% - 234.63px/2 - 170.18px);
-    top: calc(50% - 236.58px/2 + 191.79px);
-  
+    left: calc(50% - 586.58px/2 - 585.71px);
+    top: calc(50% - 591.45px/2 + 265.73px);
   }
   .vector4 {
-    left: calc(50% - 206px/2 + 200px);
-    top: calc(50% - 222.71px/2 + 100px);
-  
+    left: calc(50% - 515px/2 + 576.5px);
+    top: calc(50% - 640.77px/2 + 480.38px);
   }
   .vector5 {
-    left: calc(50% - 249.76px/2 + 140.38px);
-    top: calc(50% - 212.65px/2 + 328.83px);
+    left: calc(50% - 624.4px/2 - 52.8px);
+    top: calc(50% - 531.64px/2 + 472.82px);
   }
 }
 @screen xl {
   .vector0 {
-    left: calc(50% - 213px/2 - 117px);
-    top: calc(50% - 222.34px/2 - 258.33px);
+    left: calc(50% - 639px/2 - 724.5px);
+    top: calc(50% - 667.03px/2 - 501.49px);
   }
   .vector1 {
-    left: calc(50% - 265.23px/2 + 141.12px);
-    top: calc(50% - 228px/2 - 266.5px);
-  
+    left: calc(50% - 795.69px/2 + 97.84px);
+    top: calc(50% - 683.99px/2 - 560px);
   }
   .vector2 {
-    left: calc(50% - 223px/2 - 23px);
-    top: calc(50% - 207px/2 - 11px);
-  
+    left: calc(50% - 669px/2 + 791.5px);
+    top: calc(50% - 621px/2 - 198.5px);
   }
   .vector3 {
-    left: calc(50% - 234.63px/2 - 170.18px);
-    top: calc(50% - 236.58px/2 + 191.79px);
-  
+    left: calc(50% - 703.89px/2 - 712.05px);
+    top: calc(50% - 709.74px/2 + 293.87px);
   }
   .vector4 {
-    left: calc(50% - 206px/2 + 200px);
-    top: calc(50% - 222.71px/2 + 100px);
-  
+    left: calc(50% - 618px/2 + 823px);
+    top: calc(50% - 668.12px/2 + 515.06px);
+    
   }
   .vector5 {
-    left: calc(50% - 249.76px/2 + 140.38px);
-    top: calc(50% - 212.65px/2 + 328.83px);
+    left: calc(50% - 749.28px/2 + 46.64px);
+    top: calc(50% - 637.96px/2 + 538.98px);
   }
 }
 

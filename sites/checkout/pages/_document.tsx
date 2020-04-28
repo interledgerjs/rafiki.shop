@@ -17,6 +17,7 @@ class MyDocument extends Document {
           <title>ILP Checkout</title>
           <link rel="stylesheet"
                 href="https://fonts.googleapis.com/css?family=Rubik"/>
+                <meta name="mobile-web-app-capable" content="yes"></meta>
         </Head>
         <body className="w-full h-full bg-secondary">
           <Main/>

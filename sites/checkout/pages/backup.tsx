@@ -62,7 +62,6 @@ const DisplayCheckout: FC<{checkout: () => void}> = ({checkout}) => {
 }
 
 const DisplayInvoiceDetails: FC<any> = ({invoice}) => {
-
   return (
     <div className='h-fullflex flex-col px-6 py-6 sm:py-12'>
       <div className="text-gray-800 font-bold text-2xl text-center">
