@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from 'react'
-import axios from 'axios'
+import React, { useState } from 'react'
 import { NextPage } from "next"
-import { Base64 } from 'js-base64'
-import nanoid from 'nanoid'
 import getConfig from 'next/config'
+import ky from 'ky-universal'
 
 const { publicRuntimeConfig } = getConfig()
 
@@ -24,29 +22,6 @@ const plans = [
 		price: 499
 	}
 ]
-
-export type OAuthServerMetaData = {
-	// Ilp extension to meta data
-	payment_intents_endpoint: string
-	payment_mandates_endpoint: string
-	payment_assets_supported: string[]
-	// Subset of current meta data specified in RFC8414
-	issuer: string
-	authorization_endpoint: string
-	token_endpoint: string
-	response_types_supported: string[]
-	jwks_uri?: string
-	registration_endpoint?: string
-	scopes_supported?: string[]
-	response_modes_supported?: string[]
-	grant_types_supported?: string[]
-	token_endpoint_auth_methods_supported?: string[]
-	service_documentation?: string
-	token_endpoint_auth_signing_alg_values_supported?: string[]
-	ui_locales_supported?: string
-	op_policy_uri?: string
-	op_tos_uri?: string
-}
 
 const PaymentMethodCard: React.FC<{ hide: boolean, setPaymentPointer: React.Dispatch<React.SetStateAction<string>>, paymentPointerError: string, paymentPointer: string }> = ({ paymentPointerError, setPaymentPointer, paymentPointer, hide }) => {
 
@@ -88,11 +63,8 @@ const PaymentMethodCard: React.FC<{ hide: boolean, setPaymentPointer: React.Disp
 	)
 }
 
-type Props = {
-	id: string
-}
 
-const Page: NextPage<Props> = ({ id }) => {
+const Page: NextPage = () => {
 
 	const OAUTH_CLIENT_ID = publicRuntimeConfig.OAUTH_CLIENT_ID
 	const OAUTH_CALLBACK_URL = publicRuntimeConfig.OAUTH_CALLBACK_URL
@@ -129,11 +101,13 @@ const Page: NextPage<Props> = ({ id }) => {
 	// }, [])
 
 	function subscribe() {
-		if (hasPaymentRequest) {
-			invokePaymentHandler()
-		} else {
-			subscribeWithPaymentPointer()
-		}
+		subscribeWithPaymentPointer()
+
+		// TODO Temp remove payment handler for this use case
+		// if (hasPaymentRequest) {
+		// 	invokePaymentHandler()
+		// } else {
+		// }
 	}
 
 	async function invokePaymentHandler() {
@@ -196,45 +170,18 @@ const Page: NextPage<Props> = ({ id }) => {
 			try {
 				setIsSubmitting(true)
 				setPaymentPointerError('')
-				const sanitizedPP = paymentPointer.startsWith('$') ? 'https://' + paymentPointer.slice(1) : paymentPointer
-				// Fetch server meta data from payment pointer
-				const serverMetaData = await axios.get<OAuthServerMetaData>(sanitizedPP).then(resp => resp.data).catch(error => {
-					console.log('error getting payment pointer')
-					setPaymentPointerError('Invalid Payment Pointer')
-					setIsSubmitting(false)
-					throw error
-				})
-
-				console.log('Server meta data received from payment pointer: ', serverMetaData)
-				console.log('Creating mandate at: ', serverMetaData.payment_mandates_endpoint)
-
 
 				const selectedPlan = plans[selectedPlanIndex]
-				const yearInFuture = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).getTime()
-				// create mandate
-				const { data } = await axios.post(serverMetaData.payment_mandates_endpoint, {
-					asset: { code: 'USD', scale: 2 },
-					amount: selectedPlan.price.toString(),
-					interval: 'P0Y0M0DT0H0M60S',
-					scope: paymentPointer,
-					expiry: yearInFuture,
-					description: `ILPFlix ${selectedPlan.name} plan.`
-				})
-				const mandateId = data.id
+				 const response = await ky.post('/api/mandates', {
+				 	json: {
+				 		paymentPointer,
+						amount: selectedPlan.price
+					}
+				 }).json<{redirectUrl: string}>()
 
-				const state = Base64.encode(JSON.stringify({
-					mandate: data,
-					amount: selectedPlan.price.toString(),
-					orderId: id
-				}), true)
-
-				// request authorization for mandate
-				const authQuery = `?client_id=${OAUTH_CLIENT_ID}&response_type=code&scope=openid%20offline%20mandates.${mandateId}&state=${state}&redirect_uri=${OAUTH_CALLBACK_URL}`
-				console.log('Mandate created. ', data)
-				console.log('Redirecting to authorization endpoint to make an authorization request of:', authQuery.substring(1))
-
-				window.location.href = serverMetaData.authorization_endpoint + authQuery
+				window.location.href = response.redirectUrl
 			} catch (error) {
+				setIsSubmitting(false)
 				console.error('error', error)
 			}
 		}
@@ -285,10 +232,7 @@ const Page: NextPage<Props> = ({ id }) => {
 }
 
 Page.getInitialProps = async ({ req }) => {
-	const id = nanoid()
-	return {
-		id
-	}
+ return {}
 }
 
 export default Page

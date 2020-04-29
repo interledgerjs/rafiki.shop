@@ -11,11 +11,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
   const { body } = req
 
   try {
-    const issuer = await Issuer.discover("https://auth.rafiki.money").then(
-      rafikiIssuer => {
-        return rafikiIssuer
-      }
-    )
+    const issuer = await Issuer.discover("https://auth.rafiki.money")
 
     const client = new issuer.Client({
       client_id: OAUTH_CLIENT_ID,

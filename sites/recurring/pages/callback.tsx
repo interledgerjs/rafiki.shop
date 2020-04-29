@@ -79,7 +79,7 @@ const Page: NextPage<Props> = ({ state, code }) => {
 		setPaymentStatus('processing')
 		setPayment(payment)
 		axios.post('/api/payment', {
-			agreementId: state.mandate.id,
+			mandate: state.mandate.name,
 			amount: state.amount,
 			access_token: accesstoken
 		}).then(() => {
