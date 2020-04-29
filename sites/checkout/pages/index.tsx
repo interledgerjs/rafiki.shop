@@ -13,10 +13,6 @@ const methodName = process.env.METHOD_NAME || 'https://openpayments.dev/pay'
 
 const { publicRuntimeConfig } = getConfig()
 
-const toVisibileValue = (amount: number) => {
-  return (amount / 100).toFixed(2)
-}
-
 type Props = {
   id: string
 }
@@ -189,8 +185,8 @@ const Checkout: NextPage<Props> = ({ id }) => {
       subject: ACQUIRER_SUBJECT,
       assetCode: "USD",
       assetScale: 6,
-      amount: 500,
-      description: "ILP Eats Order"
+      amount: 5000000,
+      description: "Digital Coffee"
     }).then(response => {
       setInvoice(response.data)
       return response.data
@@ -210,9 +206,9 @@ const Checkout: NextPage<Props> = ({ id }) => {
 
         const paymentDetailsInit: PaymentDetailsInit = {
           total: {
-            label: 'ILP Eats',
+            label: 'ILP Checkout',
             amount: {
-              value: (500 / 100).toFixed(2).toString(),
+              value: (5000000 / 1000000).toFixed(2).toString(),
               currency: 'USD'
             }
           }
