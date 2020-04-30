@@ -38,8 +38,8 @@ export function useInterval(callback, delay) {
 }
 
 const Checkout: NextPage<Props> = ({ id }) => {
-  const ACQUIRER_SUBJECT = process.env.AQUIRER_SUBJECT || '$rafiki.money/p/eats@rafiki.shop'
-  const ACQUIRER_WALLET_INVOICES = process.env.AQUIRER_WALLET || 'https://rafiki.money/api/invoices'
+  const ACQUIRER_SUBJECT = process.env.AQUIRER_SUBJECT || '$localhost:3001/p/eats@rafiki.shop'
+  const ACQUIRER_WALLET_INVOICES = process.env.AQUIRER_WALLET || 'http://localhost:3001/invoices'
 
   const {register, handleSubmit, errors, setError, clearError} = useForm()
   const formRef = useRef<HTMLFormElement>(null)
@@ -112,7 +112,7 @@ const Checkout: NextPage<Props> = ({ id }) => {
         const inv = response.data
         if(inv.amount === inv.received) {
           setPaymentComplete(true)
-          sendCoffee()
+          // sendCoffee()
         }
       })
     }
@@ -269,14 +269,13 @@ const Checkout: NextPage<Props> = ({ id }) => {
           <PayForm/>
         </div>
       </div>
-      <div className={`${paymentComplete && canMakePayment ? 'flex' : 'hidden'} container justify-center mx-auto w-screen h-screen flex-col leading-tight text-dark`}>
+      <div className={`${paymentComplete ? 'flex' : 'hidden'} container justify-center mx-auto w-screen h-screen flex-col leading-tight text-dark`}>
         <div className="flex flex-col pt-2 pb-8 px-8 bg-secondary border text-center items-center border-dark mx-auto">
           <div>
             <Coffee size={200}/>
           </div>
           <div>
             <div className="text-xl">
-
               Payment Successful!
             </div>
             <div className="text-sm">
