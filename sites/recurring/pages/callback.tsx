@@ -100,7 +100,7 @@ const Page: NextPage<Props> = ({ state, code }) => {
 			paymentNumber: payment.length,
 			date: dateString(),
 			time: timeString(),
-			amount: (parseInt(state.amount)) / 100,
+			amount: (parseInt(state.amount)) / 1000000,
 			status: 'processing'
 		})
 		if (payment.length >= 6) {

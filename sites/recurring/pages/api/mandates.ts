@@ -64,9 +64,9 @@ const buildRedirectUrl = (authorizationUrl: string, mandate: Mandate): string =>
     orderId: nanoid()
   }), true)
 
-  url.searchParams.set('client_id', 'rafiki-shop-flix')
+  url.searchParams.set('client_id', OAUTH_CLIENT_ID)
   url.searchParams.set('authorization_details', JSON.stringify(authorizationDetails))
-  url.searchParams.set('redirect_uri', 'http://localhost:3000/callback')
+  url.searchParams.set('redirect_uri', OAUTH_CALLBACK_URL)
   url.searchParams.set('response_type', 'code')
   url.searchParams.set('state', state)
 

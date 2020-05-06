@@ -9,17 +9,17 @@ const plans = [
 	{
 		name: 'Basic',
 		description: "Watch on 1 screen at a time in Standard Definition",
-		price: 299
+		price: 2990000
 	},
 	{
 		name: 'Standard',
 		description: "Watch on 2 screens at a time. HD available.",
-		price: 399
+		price: 3990000
 	},
 	{
 		name: 'Premium',
 		description: "Watch on 4 screens at a time. HD and Ultra HD available.",
-		price: 499
+		price: 4990000
 	}
 ]
 
@@ -119,7 +119,7 @@ const Page: NextPage = () => {
 				mandate: {
 					asset: {
 						code: 'USD',
-						scale: 2
+						scale: 6
 					},
 					amount: selectedPlan.price.toString(),
 					description: `ILPFlix ${selectedPlan.name} plan.`,
@@ -139,7 +139,7 @@ const Page: NextPage = () => {
 			total: {
 				label: 'Subscription',
 				amount: {
-					value: (selectedPlan.price / 100).toFixed(2).toString(),
+					value: (selectedPlan.price / 100).toFixed(6).toString(),
 					currency: 'USD'
 				}
 			}
@@ -209,7 +209,7 @@ const Page: NextPage = () => {
 											{plan.description}
 										</div>
 										<div className="w-32 flex mx-auto my-auto text-lg">
-											${(plan.price / 100).toFixed(2)}/month
+											${(plan.price / 1000000).toFixed(2)}/month
                       </div>
 									</div>
 								)
