@@ -38,8 +38,8 @@ export function useInterval(callback, delay) {
 }
 
 const Checkout: NextPage<Props> = ({ id }) => {
-  const ACQUIRER_SUBJECT = process.env.AQUIRER_SUBJECT || '$localhost:3001/p/eats@rafiki.shop'
-  const ACQUIRER_WALLET_INVOICES = process.env.AQUIRER_WALLET || 'http://localhost:3001/invoices'
+  const ACQUIRER_SUBJECT = publicRuntimeConfig.AQUIRER_SUBJECT || '$localhost:3001/p/eats@rafiki.shop'
+  const ACQUIRER_WALLET_INVOICES = publicRuntimeConfig.AQUIRER_WALLET || 'http://localhost:3001/invoices'
 
   const {register, handleSubmit, errors, setError, clearError} = useForm()
   const formRef = useRef<HTMLFormElement>(null)

@@ -52,29 +52,16 @@ export const OpenPaymentsLogo = ({size}: LogoProps) => {
 
 type Props = {
   className?: string
-  onClick?: () => void,
-  loading?: boolean
+  onClick?: () => void
 }
 
-export const OpenPaymentsButton: React.FC<Props>=  ({className, onClick, loading}) => {
-  const [isLoading, setIsLoading] = useState<boolean>(false)
-
-  useEffect(() => {
-    setIsLoading(loading)
-  }, [loading])
-
+export const OpenPaymentsButton: React.FC<Props>=  ({className, onClick}) => {
   return (
-    <button onClick={onClick} type="submit" className="flex my-auto w-full content-center items-center mx-auto justify-center px-4 h-inputBox bg-black elevation-6 cursor-pointer max-w-sm sm:w-card">
-      {
-        isLoading
-          ?
-          <div className="flex my-auto font-bold" >Processing...</div>
-          :
-          <div className="my-auto flex items-center">
-            <OpenPaymentsLogo size={6}/>
-            <div className="flex my-auto text-white ml-2 text-xl">Pay</div>
-          </div>
-      }
+    <button type="submit" className="flex my-auto w-full content-center items-center mx-auto justify-center px-4 h-inputBox bg-black elevation-6 cursor-pointer max-w-sm sm:w-card">
+      <div className="my-auto flex items-center">
+        <OpenPaymentsLogo size={6}/>
+        <div className="flex my-auto text-white ml-2 text-xl">Pay</div>
+      </div>
     </button>
   )
 }
