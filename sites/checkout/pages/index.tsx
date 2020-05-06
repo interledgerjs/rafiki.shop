@@ -3,7 +3,6 @@ import axios from 'axios'
 import { NextPage } from "next"
 import nanoid from 'nanoid'
 import useForm from 'react-hook-form'
-import getConfig from 'next/config'
 import { OpenPaymentsButton } from '../components/open-payments-button'
 import QRCode from 'qrcode.react'
 import {CopyToClipboard} from 'react-copy-to-clipboard';
@@ -11,7 +10,8 @@ import { Decor, CartItem, TextInput, Coffee } from '../components'
 
 const methodName = process.env.METHOD_NAME || 'https://openpayments.dev/pay'
 
-const { publicRuntimeConfig } = getConfig()
+const ACQUIRER_SUBJECT = process.env.AQUIRER_SUBJECT || '$localhost:3001/p/eats@rafiki.shop'
+const ACQUIRER_WALLET_INVOICES = process.env.AQUIRER_WALLET || 'http://localhost:3001/invoices'
 
 type Props = {
   id: string
@@ -38,10 +38,7 @@ export function useInterval(callback, delay) {
 }
 
 const Checkout: NextPage<Props> = ({ id }) => {
-  const ACQUIRER_SUBJECT = publicRuntimeConfig.AQUIRER_SUBJECT || '$localhost:3001/p/eats@rafiki.shop'
-  const ACQUIRER_WALLET_INVOICES = publicRuntimeConfig.AQUIRER_WALLET || 'http://localhost:3001/invoices'
-
-  const {register, handleSubmit, errors, setError, clearError} = useForm()
+  const {register, handleSubmit} = useForm()
   const formRef = useRef<HTMLFormElement>(null)
 
   const [invoice, setInvoice] = useState<any>()
@@ -65,7 +62,7 @@ const Checkout: NextPage<Props> = ({ id }) => {
                 <TextInput
                   errorState={null}
                   validationFunction={validateEmail}
-                  inputRef={(register({required: true}))}
+                  inputRef={(register({required: false}))}
                   name='email'
                   label='Email'
                   hint={'Email is required to receive your coffee.'}
@@ -177,7 +174,7 @@ const Checkout: NextPage<Props> = ({ id }) => {
   }
 
   const checkout = async data => {
-    console.log('data', data.email, validateEmail({ target: { value: data.email } }))
+    console.log('data', data.email, validateEmail({ target: { value: data.email } }), ACQUIRER_WALLET_INVOICES, ACQUIRER_SUBJECT)
     if (validateEmail({ target: { value: data.email } })) {
       setEmail(data.email)
     } 
