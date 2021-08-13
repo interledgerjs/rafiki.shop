@@ -13,7 +13,7 @@
     "ilp-protocol-stream": "^2.2.0",
     "js-base64": "^2.5.1",
     "nanoid": "^2.1.6",
-    "next": "9.1.2",
+    "next": "11.1.0",
     "openid-client": "^3.8.2",
     "react": "16.11.0",
     "react-dom": "16.11.0",
