@@ -13,7 +13,7 @@
     "ilp-protocol-stream": "^2.2.0",
     "js-base64": "^2.5.1",
     "ky": "^0.18.0",
-    "nanoid": "^2.1.6",
+    "nanoid": "^3.1.31",
     "next": "^9.3.4",
     "openid-client": "^3.8.2",
     "qrcode.react": "^1.0.0",
