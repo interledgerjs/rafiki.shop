@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "dotenv": "^8.2.0",
-    "got": "^9.6.0",
+    "got": "^11.8.5",
     "ilp-protocol-stream": "^2.2.0",
     "js-base64": "^2.5.1",
     "nanoid": "^2.1.6",
